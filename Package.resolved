@@ -1,0 +1,22 @@
+{
+  "pins" : [
+    {
+      "identity" : "async",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/natinusala/Async.git",
+      "state" : {
+        "revision" : "a20ccabfdaf740f14b42eadf46fa9baac882078f"
+      }
+    },
+    {
+      "identity" : "opencombine",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/OpenCombine/OpenCombine.git",
+      "state" : {
+        "revision" : "28993ae57de5a4ea7e164787636cafad442d568c",
+        "version" : "0.12.0"
+      }
+    }
+  ],
+  "version" : 2
+}
