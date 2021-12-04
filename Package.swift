@@ -18,6 +18,9 @@
 
 import PackageDescription
 
+/// Should debug features of Yoga be enabled?
+let debugYoga = false
+
 let package = Package(
     name: "Ripple",
     products: [
@@ -28,6 +31,49 @@ let package = Package(
         .package(url: "https://github.com/natinusala/Async.git", branch: "a20ccabfdaf740f14b42eadf46fa9baac882078f"),
     ],
     targets: [
+        .target(
+            name: "CYoga",
+            path: "External/CYoga",
+            exclude: [
+                "java",
+                "javascript",
+                "testutil",
+                "website",
+                "android",
+                "lib",
+                "tests",
+                "tools",
+                "util",
+                "gentest",
+                "mode",
+                "csharp",
+                "gradle",
+                "scripts",
+                "benchmark",
+                "YogaKit",
+                "yogacore",
+                "enums.py",
+                "gradle.properties",
+                "third-party(Yoga).xcconfig",
+                "CONTRIBUTING.md",
+                "YogaKit.podspec",
+                "BUCK",
+                "gradlew.bat",
+                "gradlew",
+                "build.gradle",
+                "CMakeLists.txt",
+                "settings.gradle",
+                "LICENSE-examples",
+                "LICENSE",
+                "Yoga.podspec",
+                "README.md",
+                "CODE_OF_CONDUCT.md",
+            ],
+            sources: ["yoga"],
+            publicHeadersPath: ".",
+            cSettings: debugYoga ? [.define("DEBUG")] : []
+        ),
+        .target(name: "Yoga", dependencies: ["CYoga"], path: "External/Yoga"),
         .executableTarget(
             name: "RippleDemo",
             dependencies: ["Ripple"]
@@ -45,6 +91,7 @@ let package = Package(
             name: "RippleUI",
             dependencies: [
                 "RippleCore",
+                "Yoga",
             ]
         ),
         .target(

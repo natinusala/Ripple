@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-import SkylarkCore
+import RippleCore
 
 import Yoga
 
