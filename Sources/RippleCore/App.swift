@@ -42,9 +42,6 @@ public protocol App {
 
     /// Makes the target of that app.
     static func makeTarget(of app: Self) -> Target
-
-    /// Updates the target of that app.
-    static func updateTarget(_ target: Target, with app: Self)
 }
 
 extension App {
@@ -59,9 +56,6 @@ public extension App {
     static func makeTarget(of app: Self) -> Never {
         fatalError("Apps do not have a target by default, please import a target library before continuing")
     }
-
-    /// Default implementation of `updateTarget(_:target:)`.
-    static func updateTarget(_ target: Never, with app: Self) {}
 }
 
 /// The output of an app, aka the actual app represented by
@@ -75,7 +69,6 @@ public class AppOutput: Output {
     public let makeBody: () -> [Output]
 
     public let makeTarget: () -> TargetNode?
-    public let updateTarget: (TargetNode) -> ()
 
     public let isShallow: Bool
     public let modifiers: [ViewModifierTarget] = []
@@ -94,14 +87,6 @@ public class AppOutput: Output {
             }
 
             return A.makeTarget(of: app)
-        }
-
-        self.updateTarget = { target in
-            guard let target = target as? A.Target else {
-                fatalError("`updateTarget()` called with a target of the wrong type")
-            }
-
-            A.updateTarget(target, with: app)
         }
 
         self.isShallow = A.Body.self != Never.self && A.Target.self == Never.self

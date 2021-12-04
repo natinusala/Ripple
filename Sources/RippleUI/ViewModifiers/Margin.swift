@@ -31,8 +31,6 @@ public struct MarginModifier: ViewModifier {
     public static func makeTarget(of modifier: MarginModifier) -> MarginTarget {
         return MarginTarget(margin: modifier.margin)
     }
-
-    public static func updateTarget(_ target: MarginTarget, with modifier: MarginModifier) {}
 }
 
 public extension View {
@@ -51,6 +49,8 @@ public extension View {
 public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
     let margin: MarginModifier.Margin
 
+    public var boundTarget: TargetNode?
+
     public init(margin: MarginModifier.Margin) {
         self.margin = margin
     }
@@ -59,8 +59,8 @@ public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
         return "margin=\(self.margin)"
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             YGNodeStyleSetMargin(ygNode, YGEdgeTop, self.margin.top)
             YGNodeStyleSetMargin(ygNode, YGEdgeRight, self.margin.right)
             YGNodeStyleSetMargin(ygNode, YGEdgeBottom, self.margin.bottom)

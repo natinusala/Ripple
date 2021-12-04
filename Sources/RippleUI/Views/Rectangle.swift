@@ -22,7 +22,7 @@ public struct Rectangle: View {
 
     /// Creates a new rectangle.
     public init(color: @autoclosure @escaping Binding<Color>.Function) {
-        self._color = Binding<Color>(color())
+        self._color = .init(color())
     }
 
     public var body: some View {

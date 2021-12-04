@@ -27,8 +27,6 @@ public struct ShrinkModifier: ViewModifier {
     public static func makeTarget(of modifier: ShrinkModifier) -> ShrinkTarget {
         return ShrinkTarget(shrink: modifier.shrink)
     }
-
-    public static func updateTarget(_ target: ShrinkTarget, with modifier: ShrinkModifier) {}
 }
 
 public extension View {
@@ -41,6 +39,8 @@ public extension View {
 /// Target for shrink modifier.
 public class ShrinkTarget: ViewModifierTarget, CustomStringConvertible {
     let shrink: Float
+
+    public var boundTarget: TargetNode?
 
     public init(shrink: Float) {
         self.shrink = shrink

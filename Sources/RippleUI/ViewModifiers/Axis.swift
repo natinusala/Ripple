@@ -28,8 +28,6 @@ public struct AxisModifier: ViewModifier {
     public static func makeTarget(of modifier: AxisModifier) -> AxisTarget {
         return AxisTarget(axis: modifier.axis)
     }
-
-    public static func updateTarget(_ target: AxisTarget, with modifier: AxisModifier) {}
 }
 
 public extension Node {
@@ -43,12 +41,14 @@ public extension Node {
 public class AxisTarget: ViewModifierTarget, CustomStringConvertible {
     let axis: Axis
 
+    public var boundTarget: TargetNode?
+
     init(axis: Axis) {
         self.axis = axis
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             YGNodeStyleSetFlexDirection(ygNode, self.axis.yogaFlexDirection)
         }
     }

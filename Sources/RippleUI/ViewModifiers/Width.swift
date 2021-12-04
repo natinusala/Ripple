@@ -29,8 +29,6 @@ public struct WidthModifier: ViewModifier {
     public static func makeTarget(of view: WidthModifier) -> WidthTarget {
         return WidthTarget(width: view.width)
     }
-
-    public static func updateTarget(_ target: WidthTarget, with modifier: WidthModifier) {}
 }
 
 public extension View {
@@ -54,6 +52,8 @@ public extension View {
 public class WidthTarget: ViewModifierTarget, CustomStringConvertible {
     let width: Dimension
 
+    public var boundTarget: TargetNode?
+
     init(width: Dimension) {
         self.width = width
     }
@@ -62,8 +62,8 @@ public class WidthTarget: ViewModifierTarget, CustomStringConvertible {
         return "width=\(self.width)"
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             switch self.width {
                 case let .dip(dip):
                     YGNodeStyleSetMinWidth(ygNode, dip)

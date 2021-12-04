@@ -31,8 +31,6 @@ public struct PaddingModifier: ViewModifier {
     public static func makeTarget(of modifier: PaddingModifier) -> PaddingTarget {
         return PaddingTarget(padding: modifier.padding)
     }
-
-    public static func updateTarget(_ target: PaddingTarget, with modifier: PaddingModifier) {}
 }
 
 public extension View {
@@ -51,6 +49,8 @@ public extension View {
 public class PaddingTarget: ViewModifierTarget, CustomStringConvertible {
     let padding: PaddingModifier.Padding
 
+    public var boundTarget: TargetNode?
+
     public init(padding: PaddingModifier.Padding) {
         self.padding = padding
     }
@@ -59,8 +59,8 @@ public class PaddingTarget: ViewModifierTarget, CustomStringConvertible {
         return "padding=\(self.padding)"
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             YGNodeStyleSetPadding(ygNode, YGEdgeTop, self.padding.top)
             YGNodeStyleSetPadding(ygNode, YGEdgeRight, self.padding.right)
             YGNodeStyleSetPadding(ygNode, YGEdgeBottom, self.padding.bottom)

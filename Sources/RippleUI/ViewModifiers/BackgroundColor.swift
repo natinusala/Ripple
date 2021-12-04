@@ -27,8 +27,6 @@ public struct BackgroundColorModifier: ViewModifier {
     public static func makeTarget(of modifier: BackgroundColorModifier) -> BackgroundColorTarget {
         return BackgroundColorTarget(color: modifier.color)
     }
-
-    public static func updateTarget(_ target: BackgroundColorTarget, with modifier: BackgroundColorModifier) {}
 }
 
 extension View {
@@ -41,6 +39,8 @@ extension View {
 /// Target for background color modifier.
 public class BackgroundColorTarget: ViewModifierTarget, CustomStringConvertible {
     let color: Color
+
+    public var boundTarget: TargetNode?
 
     public init(color: Color) {
         self.color = color

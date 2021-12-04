@@ -42,10 +42,6 @@ public struct Node<Content>: View where Content: View {
     public static func makeTarget(of view: Self) -> NodeTarget {
         return NodeTarget()
     }
-
-    public static func updateTarget(_ target: NodeTarget, with view: Self) {
-        fatalError("Node updateTarget unimplemented")
-    }
 }
 
 /// Target for a node.

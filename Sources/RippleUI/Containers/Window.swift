@@ -22,7 +22,7 @@ public struct Window<Content>: Container where Content: View {
     let content: Content
 
     public init(title: @escaping @autoclosure Binding<String>.Function, content: () -> Content) {
-        self._title = Binding<String>(title())
+        self._title = .init(title())
         self.content = content()
     }
 }

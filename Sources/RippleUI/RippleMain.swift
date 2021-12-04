@@ -23,6 +23,6 @@ extension App {
     /// entry point of your executable target. Calling this
     /// method directly is not supported.
     public static func main() {
-        
+        let engine = Engine(running: self.init())
     }
 }

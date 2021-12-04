@@ -33,9 +33,6 @@ public protocol Container {
 
     /// Makes the target of that container.
     static func makeTarget(of container: Self) -> Target
-
-    /// Updates the target of that container.
-    static func updateTarget(_ target: Target, with container: Self)
 }
 
 extension Container where Body == Never {
@@ -53,8 +50,6 @@ public extension Container {
     static func makeTarget(of container: Self) -> Never {
         fatalError("`makeTarget(of:)` called on a container without a target")
     }
-
-    static func updateTarget(_ target: Never, with container: Self) {}
 }
 
 /// The output of a container, aka the actual container represented by
@@ -70,7 +65,6 @@ public class ContainerOutput: Output {
     public let makeBody: () -> [Output]
 
     public let makeTarget: () -> TargetNode?
-    public let updateTarget: (TargetNode) -> ()
 
     public var isShallow: Bool
     public let modifiers: [ViewModifierTarget] = []
@@ -94,14 +88,6 @@ public class ContainerOutput: Output {
             }
 
             return C.makeTarget(of: container)
-        }
-
-        self.updateTarget = { target in
-            guard let target = target as? C.Target else {
-                fatalError("`updateTarget()` called with a target of the wrong type")
-            }
-
-            C.updateTarget(target, with: container)
         }
 
         self.isShallow = C.Body.self != Never.self && C.Target.self == Never.self

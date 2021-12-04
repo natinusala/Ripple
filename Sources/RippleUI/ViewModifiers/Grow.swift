@@ -29,8 +29,6 @@ public struct GrowModifier: ViewModifier {
     public static func makeTarget(of modifier: GrowModifier) -> GrowTarget {
         return GrowTarget(grow: modifier.grow)
     }
-
-    public static func updateTarget(_ target: GrowTarget, with modifier: GrowModifier) {}
 }
 
 public extension View {
@@ -44,6 +42,8 @@ public extension View {
 public class GrowTarget: ViewModifierTarget, CustomStringConvertible {
     let grow: Float
 
+    public var boundTarget: TargetNode?
+
     public init(grow: Float) {
         self.grow = grow
     }
@@ -52,8 +52,8 @@ public class GrowTarget: ViewModifierTarget, CustomStringConvertible {
         return "grow=\(self.grow)"
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             YGNodeStyleSetFlexGrow(ygNode, self.grow)
         }
     }

@@ -29,8 +29,6 @@ public struct HeightModifier: ViewModifier {
     public static func makeTarget(of modifier: HeightModifier) -> HeightTarget {
         return HeightTarget(height: modifier.height)
     }
-
-    public static func updateTarget(_ target: HeightTarget, with modifier: HeightModifier) {}
 }
 
 public extension View {
@@ -54,6 +52,8 @@ public extension View {
 public class HeightTarget: ViewModifierTarget, CustomStringConvertible {
     let height: Dimension
 
+    public var boundTarget: TargetNode?
+
     init(height: Dimension) {
         self.height = height
     }
@@ -62,8 +62,8 @@ public class HeightTarget: ViewModifierTarget, CustomStringConvertible {
         return "height=\(self.height)"
     }
 
-    public func apply(to target: TargetNode) {
-        if let ygNode = (target as? ViewTarget)?.ygNode {
+    public func apply() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
             switch self.height {
                 case let .dip(dip):
                     YGNodeStyleSetMinHeight(ygNode, dip)

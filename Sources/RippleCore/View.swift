@@ -34,17 +34,12 @@ public protocol View {
 
     /// Makes the target of that view.
     static func makeTarget(of view: Self) -> Target
-
-    /// Updates the target of that view.
-    static func updateTarget(_ target: Target, with view: Self)
 }
 
 public extension View {
     static func makeTarget(of view: Self) -> Never {
         fatalError("`makeTarget(of:)` called on a view without a target")
     }
-
-    static func updateTarget(_ target: Never, with view: Self) {}
 }
 
 extension Never: View {}
@@ -103,8 +98,6 @@ public struct VoidView: View {
     public static func makeTarget(of view: VoidView) -> Never {
         fatalError("`makeTarget(of:)` called on VoidView")
     }
-
-    public static func updateTarget(_ target: Never, with view: VoidView) {}
 }
 
 /// The output of a view, aka the actual view(s) represented by
@@ -123,7 +116,6 @@ public class ViewOutput: CustomStringConvertible, Output {
     public var modifiers: [ViewModifierTarget] = []
 
     public let makeTarget: () -> TargetNode?
-    public let updateTarget: (TargetNode) -> ()
 
     public let isShallow: Bool
 
@@ -146,14 +138,6 @@ public class ViewOutput: CustomStringConvertible, Output {
             }
 
             return V.makeTarget(of: view)
-        }
-
-        self.updateTarget = { target in
-            guard let target = target as? V.Target else {
-                fatalError("`updateTarget()` called with a target of the wrong type")
-            }
-
-            V.updateTarget(target, with: view)
         }
 
         self.isShallow = V.Body.self != Never.self && V.Target.self == Never.self

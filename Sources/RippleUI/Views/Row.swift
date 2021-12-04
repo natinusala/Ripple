@@ -18,18 +18,16 @@ import RippleCore
 
 /// A view that arranges its children in a vertical line.
 public struct Row<Content>: View where Content: View {
-    public typealias ContentBuilder = () -> Content
-
-    @ViewBuilder let content: ContentBuilder
+    let content: Content
 
     /// Creates a new row.
-    public init(@ViewBuilder content: @escaping ContentBuilder) {
-        self.content = content
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
     }
 
     public var body: some View {
         Node {
-            self.content()
+            self.content
         }
             .axis(.row)
     }

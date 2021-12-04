@@ -30,9 +30,6 @@ public protocol ViewModifier {
 
     /// Creates the target of this view modifier.
     static func makeTarget(of modifier: Self) -> Target
-
-    /// Updates the target of this view modifier.
-    static func updateTarget(_ target: Target, with modifier: Self)
 }
 
 extension ViewModifier {
@@ -45,9 +42,6 @@ extension ViewModifier {
     public static func makeTarget(of view: Self) -> Never {
         fatalError("`makeTarget(of:)` called on a view modifier without a target")
     }
-
-    /// Default implementation of `updateTarget(of:impl:)`.
-    public static func updateTarget(_ target: Never, with modifier: Self) {}
 }
 
 /// Type of content views passed to the `body(content:)` function of a modifier.
@@ -100,24 +94,20 @@ extension ModifiedContent: View where Content: View, Modifier: ViewModifier {
 
 /// A view modifier target, aka the actual modifier implementation.
 public protocol ViewModifierTarget {
-    /// Applies the modifier to the given target view.
-    func apply(to target: TargetNode)
+    var boundTarget: TargetNode? { get set }
 
-    /// Resets the modifier on the given target view. The end result
+    /// Applies the modifier to its bound target view.
+    func apply()
+
+    /// Resets the modifier on the bound target view. The end result
     /// should be as if the modifier was never applied to the target.
-    func reset(target: TargetNode)
-}
-
-extension Never: ViewModifierTarget {
-    public func apply(to target: TargetNode) {
-        fatalError("`apply(to:)` called on `Never`")
-    }
+    func reset()
 }
 
 public extension ViewModifierTarget {
-    /// Default implementation of `apply(to:)`.
-    func apply(to target: TargetNode) {}
+    /// Default implementation of `apply()`.
+    func apply() {}
 
-    /// Default implementation of `reset(target:)`.
-    func reset(target: TargetNode) {}
+    /// Default implementation of `reset()`.
+    func reset() {}
 }

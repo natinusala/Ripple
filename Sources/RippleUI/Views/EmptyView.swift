@@ -25,8 +25,6 @@ public struct EmptyView: View {
     public static func makeTarget(of view: EmptyView) -> EmptyViewTarget {
         return EmptyViewTarget()
     }
-
-    public static func updateTarget(_ target: EmptyViewTarget, with view: EmptyView) {}
 }
 
 /// Target for empty views.

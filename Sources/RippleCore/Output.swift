@@ -30,9 +30,6 @@ public protocol Output: CustomStringConvertible {
     /// `nil` if there is no target associated to that node.
     var makeTarget: () -> TargetNode? { get }
 
-    /// Updates the target of that app, container of view.
-    var updateTarget: (TargetNode) -> () { get }
-
     /// Is this app, container or view shallow? Shallow views are views that
     /// don't exist in the final tree because they are not made of any target, but have a body
     /// containing another (possibly also shallow) view.
