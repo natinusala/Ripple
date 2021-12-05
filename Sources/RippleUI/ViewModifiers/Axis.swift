@@ -19,42 +19,38 @@ import Yoga
 
 /// Modifies the axis of a node.
 public struct AxisModifier: ViewModifier {
-    let axis: Axis
+    @Rippling var axis: Axis
 
-    init(axis: Axis) {
-        self.axis = axis
+    init(axis: Rippling<Axis>) {
+        self._axis = axis
     }
 
     public static func makeTarget(of modifier: AxisModifier) -> AxisTarget {
-        return AxisTarget(axis: modifier.axis)
+        return AxisTarget(observing: modifier._axis)
     }
 }
 
 public extension Node {
     /// Modifies the axis of the node.
-    func axis(_ axis: Axis) -> some View {
-        return modifier(AxisModifier(axis: axis))
+    func axis(_ axis: @autoclosure @escaping Ripplet<Axis>) -> some View {
+        return modifier(AxisModifier(axis: .init(axis())))
     }
 }
 
 /// Target for axis view modifier.
-public class AxisTarget: ViewModifierTarget, CustomStringConvertible {
-    let axis: Axis
-
-    public var boundTarget: TargetNode?
-
-    init(axis: Axis) {
-        self.axis = axis
-    }
-
-    public func apply() {
+public class AxisTarget: ObservingViewModifierTarget<Axis>, CustomStringConvertible {
+    override public func onValueChange(newValue: Axis) {
         if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexDirection(ygNode, self.axis.yogaFlexDirection)
+            YGNodeStyleSetFlexDirection(ygNode, newValue.yogaFlexDirection)
         }
     }
 
+    override public func reset() {
+        fatalError("Axis modifier cannot be reset")
+    }
+
     public var description: String {
-        return "axis=\(self.axis)"
+        return "axis=\(self.observedValue)"
     }
 }
 
@@ -75,7 +71,7 @@ public enum Axis {
 }
 
 public extension YGFlexDirection {
-    /// Corresponding Skylark axis.
+    /// Corresponding Ripple axis.
     var axis: Axis {
         switch self {
             case YGFlexDirectionColumn:

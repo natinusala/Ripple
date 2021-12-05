@@ -14,19 +14,11 @@
     limitations under the License.
 */
 
-import RippleCore
+// Those flags are used to toggle debug messages of various components of the
+// library at compile time. Please set them all to `false` before commiting.
 
-/// A simple solid color rectangle.
-public struct Rectangle: View {
-    @Rippling var color: Color
+/// Enables core logs (engine, mounting / unmounting, view updates...).
+let debugCore = true
 
-    /// Creates a new rectangle.
-    public init(color: @autoclosure @escaping Ripplet<Color>) {
-        self._color = .init(color())
-    }
-
-    public var body: some View {
-        EmptyView()
-            .backgroundColor(self.color)
-    }
-}
+/// Enables target logs.
+let debugTarget = true

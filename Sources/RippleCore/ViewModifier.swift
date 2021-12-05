@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import OpenCombine
+
 /// A modifier that you apply to a view or another view modifier, producing a different version of the original value.
 public protocol ViewModifier {
     /// The type of view representing the body of this modifier.
@@ -93,7 +95,7 @@ extension ModifiedContent: View where Content: View, Modifier: ViewModifier {
 }
 
 /// A view modifier target, aka the actual modifier implementation.
-public protocol ViewModifierTarget {
+public protocol ViewModifierTarget: AnyObject {
     var boundTarget: TargetNode? { get set }
 
     /// Applies the modifier to its bound target view.
@@ -110,4 +112,43 @@ public extension ViewModifierTarget {
 
     /// Default implementation of `reset()`.
     func reset() {}
+}
+
+/// Convenience class for modifier targets that takes care of
+/// observing its value for changes and re-applying the modifier when
+/// that happens.
+///
+/// Override the `onValueChange(newValue:)` method to implement your changes.
+/// `apply()` does not need to be overridden as it already calls `onValueChange(newValue:)`.
+/// `reset()` can be overridden if needed.
+open class ObservingViewModifierTarget<Value>: ViewModifierTarget {
+    public internal(set) var observedValue: Value
+
+    public var boundTarget: TargetNode?
+
+    var subscription: AnyCancellable?
+
+    /// Creates a new target observing the given value.
+    public init<V: ObservableValue>(observing value: V) where V.Value == Value {
+        self.observedValue = value.value
+
+        self.subscription = value.observe { newValue in
+            self.observedValue = newValue
+            self.onValueChange(newValue: newValue)
+        }
+    }
+
+    /// Called whenever the observer value changes to reflect the change
+    /// on the bound target view.
+    open func onValueChange(newValue: Value) {
+        // Nothing by default
+    }
+
+    public func apply() {
+        self.onValueChange(newValue: self.observedValue)
+    }
+
+    open func reset() {
+        // Nothing to do by default
+    }
 }

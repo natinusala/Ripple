@@ -20,51 +20,29 @@ import Yoga
 
 /// Changes the height of a view.
 public struct HeightModifier: ViewModifier {
-    let height: Dimension
+    @Rippling var height: Dimension
 
-    init(height: Dimension) {
-        self.height = height
+    init(height: Rippling<Dimension>) {
+        self._height = height
     }
 
     public static func makeTarget(of modifier: HeightModifier) -> HeightTarget {
-        return HeightTarget(height: modifier.height)
+        return HeightTarget(observing: modifier._height)
     }
 }
 
 public extension View {
     /// Changes the height of the view.
-    func height(_ height: DIP) -> some View {
-        return modifier(HeightModifier(height: .dip(height)))
-    }
-
-    /// Changes the height of the view.
-    func height(_ height: Percentage) -> some View {
-        return modifier(HeightModifier(height: .percentage(height)))
-    }
-
-    /// Changes the height of the view.
-    func height(_ height: Auto) -> some View {
-        return modifier(HeightModifier(height: .auto))
+    func height(_ height: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+        return modifier(HeightModifier(height: .init(height())))
     }
 }
 
 /// Target for height modifier.
-public class HeightTarget: ViewModifierTarget, CustomStringConvertible {
-    let height: Dimension
-
-    public var boundTarget: TargetNode?
-
-    init(height: Dimension) {
-        self.height = height
-    }
-
-    public var description: String {
-        return "height=\(self.height)"
-    }
-
-    public func apply() {
+public class HeightTarget: ObservingViewModifierTarget<Dimension>, CustomStringConvertible {
+    override public func onValueChange(newValue: Dimension) {
         if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            switch self.height {
+            switch newValue {
                 case let .dip(dip):
                     YGNodeStyleSetMinHeight(ygNode, dip)
                     YGNodeStyleSetHeight(ygNode, dip)
@@ -76,5 +54,16 @@ public class HeightTarget: ViewModifierTarget, CustomStringConvertible {
                     YGNodeStyleSetHeightAuto(ygNode)
             }
         }
+    }
+
+    override public func reset() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetMinHeight(ygNode, YGUndefined)
+            YGNodeStyleSetHeight(ygNode, YGUndefined)
+        }
+    }
+
+    public var description: String {
+        return "height=\(self.observedValue)"
     }
 }

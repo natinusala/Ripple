@@ -20,51 +20,29 @@ import Yoga
 
 /// Changes the width of a view.
 public struct WidthModifier: ViewModifier {
-    let width: Dimension
+    @Rippling var width: Dimension
 
-    init(width: Dimension) {
-        self.width = width
+    init(width: Rippling<Dimension>) {
+        self._width = width
     }
 
     public static func makeTarget(of view: WidthModifier) -> WidthTarget {
-        return WidthTarget(width: view.width)
+        return WidthTarget(observing: view._width)
     }
 }
 
 public extension View {
     /// Changes the width of the view.
-    func width(_ width: DIP) -> some View {
-        return modifier(WidthModifier(width: .dip(width)))
-    }
-
-    /// Changes the width of the view.
-    func width(_ width: Percentage) -> some View {
-        return modifier(WidthModifier(width: .percentage(width)))
-    }
-
-    /// Changes the width of the view.
-    func width(_ width: Auto) -> some View {
-        return modifier(WidthModifier(width: .auto))
+    func width(_ width: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+        return modifier(WidthModifier(width: .init(width())))
     }
 }
 
 /// Target for width modifier.
-public class WidthTarget: ViewModifierTarget, CustomStringConvertible {
-    let width: Dimension
-
-    public var boundTarget: TargetNode?
-
-    init(width: Dimension) {
-        self.width = width
-    }
-
-    public var description: String {
-        return "width=\(self.width)"
-    }
-
-    public func apply() {
+public class WidthTarget: ObservingViewModifierTarget<Dimension>, CustomStringConvertible {
+    override public func onValueChange(newValue: Dimension) {
         if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            switch self.width {
+            switch newValue {
                 case let .dip(dip):
                     YGNodeStyleSetMinWidth(ygNode, dip)
                     YGNodeStyleSetWidth(ygNode, dip)
@@ -76,5 +54,16 @@ public class WidthTarget: ViewModifierTarget, CustomStringConvertible {
                     YGNodeStyleSetWidthAuto(ygNode)
             }
         }
+    }
+
+    override public func reset() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetMinWidth(ygNode, YGUndefined)
+            YGNodeStyleSetWidth(ygNode, YGUndefined)
+        }
+    }
+
+    public var description: String {
+        return "width=\(self.observedValue)"
     }
 }

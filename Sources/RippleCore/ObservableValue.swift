@@ -20,11 +20,11 @@ import Async
 import OpenCombine
 import OpenCombineDispatch
 
-typealias ObservableSubject = PassthroughSubject<Void, Never>
+public typealias ObservableSubject = PassthroughSubject<Void, Never>
 extension ObservableSubject: Hashable, Equatable {} // Uses default implementations defined in Extensions.swift
 
 /// A value that can be observated for changes.
-protocol ObservableValue: AnyObject {
+public protocol ObservableValue: AnyObject {
     /// Type of the obervable value.
     associatedtype Value
 

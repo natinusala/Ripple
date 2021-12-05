@@ -17,12 +17,29 @@
 import RippleCore
 
 public struct Window<Content>: Container where Content: View {
-    @Binding var title: String
+    @Rippling var title: String
 
     let content: Content
 
-    public init(title: @escaping @autoclosure Binding<String>.Function, content: () -> Content) {
+    public init(title: @escaping @autoclosure Ripplet<String>, content: () -> Content) {
         self._title = .init(title())
         self.content = content()
+    }
+
+    public var body: Content {
+        self.content
+    }
+
+    public static func makeTarget(of container: Self) -> WindowTarget {
+        return WindowTarget(title: container.$title)
+    }
+}
+
+/// Target for a window container.
+public class WindowTarget: ContainerTarget {
+    @Rippling var title: String
+
+    init(title: Rippling<String>) {
+        self._title = title
     }
 }

@@ -20,41 +20,39 @@ import Yoga
 
 /// Changes the grow factor of a view.
 public struct GrowModifier: ViewModifier {
-    let grow: Float
+    @Rippling var grow: Float
 
-    public init(grow: Float) {
-        self.grow = grow
+    public init(grow: Rippling<Float>) {
+        self._grow = grow
     }
 
     public static func makeTarget(of modifier: GrowModifier) -> GrowTarget {
-        return GrowTarget(grow: modifier.grow)
+        return GrowTarget(observing: modifier._grow)
     }
 }
 
 public extension View {
     /// Changes the grow factor of the view.
-    func grow(_ grow: Float) -> some View {
-        return modifier(GrowModifier(grow: grow))
+    func grow(_ grow: @autoclosure @escaping Ripplet<Float>) -> some View {
+        return modifier(GrowModifier(grow: .init(grow())))
     }
 }
 
 /// Target for grow modifier.
-public class GrowTarget: ViewModifierTarget, CustomStringConvertible {
-    let grow: Float
+public class GrowTarget: ObservingViewModifierTarget<Float>, CustomStringConvertible {
+    override public func onValueChange(newValue: Float) {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetFlexGrow(ygNode, newValue)
+        }
+    }
 
-    public var boundTarget: TargetNode?
-
-    public init(grow: Float) {
-        self.grow = grow
+    override public func reset() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetFlexGrow(ygNode, YGUndefined)
+        }
     }
 
     public var description: String {
-        return "grow=\(self.grow)"
-    }
-
-    public func apply() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexGrow(ygNode, self.grow)
-        }
+        return "grow=\(self.observedValue)"
     }
 }

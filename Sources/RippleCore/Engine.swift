@@ -19,7 +19,7 @@
 ///
 /// The target library should provide a main function to initialize the engine and run the
 /// created target app.
-class Engine {
+public class Engine {
     let root: MountedNode
     let target: TargetNode
 
@@ -35,7 +35,106 @@ class Engine {
         self.target = target
         self.root = MountedNode(output: output, target: target)
 
-        // Mount the whole tree
-        self.root.mountBody()
+        if debugCore {
+            self.debugMountedTree(node: self.root)
+        }
+
+        if debugTarget {
+            self.debugTargetTree(node: self.target)
+        }
+    }
+
+    func debugMountedTree(node: MountedNode, indent: Int = 0) {
+        Logger.debug(debugCore, "\(String(repeating: " ", count: indent))- \(node)")
+
+        for child in node.children {
+            self.debugMountedTree(node: child, indent: indent + 4)
+        }
+    }
+
+    func debugTargetTree(node: TargetNode, indent: Int = 0) {
+        Logger.debug(debugTarget, "\(String(repeating: " ", count: indent))- \(node)")
+
+        for child in node.children {
+            self.debugTargetTree(node: child, indent: indent + 4)
+        }
+    }
+}
+
+/// Represents an element mounted in the app tree. An element can be an app,
+/// a container or a view.
+class MountedNode: CustomStringConvertible {
+    let output: Output
+    let target: TargetNode?
+
+    var parent: MountedNode?
+    var children: [MountedNode] = []
+
+    /// Creates a new node.
+    init(output: Output, parent: MountedNode? = nil, target: TargetNode? = nil) {
+        self.output = output
+        self.target = target
+        self.parent = parent
+
+        // Evaluate and mount the whole body
+        for child in self.output.makeBody() {
+            // Create and insert target if any
+            let target = child.makeTarget()
+            if let childTarget = target {
+                // Connect the target to the last view with a target
+                self.insertChildTarget(childTarget, in: self)
+
+                // If the child is non-shallow, apply it its own modifiers
+                if !child.isShallow {
+                    for modifier in child.modifiers {
+                        modifier.boundTarget = childTarget
+                        modifier.apply()
+                    }
+                }
+
+                // Apply modifiers of all parent shallow views (stops at the
+                // first non shallow parent)
+                for modifier in self.gatherModifiers() {
+                    modifier.boundTarget = childTarget
+                    modifier.apply()
+                }
+            }
+
+            // Mount node
+            let node = MountedNode(output: child, parent: self, target: target)
+            self.children.append(node)
+        }
+    }
+
+    /// Inserts the target to the upper-most parent that also has a target.
+    /// Will fatal error if no parent was found with a target after traversing the whole tree.
+    func insertChildTarget(_ target: TargetNode, in parent: MountedNode, at position: UInt? = nil) {
+        if let parentTarget = parent.target {
+            parentTarget.insert(child: target, at: position)
+        } else {
+            if let grandParent = parent.parent {
+                self.insertChildTarget(target, in: grandParent, at: position)
+            } else {
+                fatalError("Cannot attach target \(target) to any parent (tried \(parent) last)")
+            }
+        }
+    }
+
+    /// Returns all modifiers if the node is shallow, as well
+    /// all modifiers of its shallow parents (stops at first non shallow parent).
+    func gatherModifiers() -> [ViewModifierTarget] {
+        // If we are a shallow view, return all of our modifiers then add modifiers
+        // of our (possibly shallow too) parent.
+        // Otherwise, return an empty list.
+
+        if self.output.isShallow {
+            return self.output.modifiers + (self.parent?.gatherModifiers() ?? [])
+        }
+
+        return []
+    }
+
+    public var description: String {
+        return self.output.description
     }
 }

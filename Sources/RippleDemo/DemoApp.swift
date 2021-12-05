@@ -91,7 +91,7 @@ struct MainView: View {
 @main
 struct DemoApp: App {
     var body: some Container {
-        Window(title: "Skylark Demo") {
+        Window(title: "Ripple Demo") {
             MainView()
         }
     }

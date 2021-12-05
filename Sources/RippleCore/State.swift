@@ -22,11 +22,11 @@ import OpenCombine
 /// binding that depends on this variable (and any binding that depends on those bindings...).
 @propertyWrapper
 public class State<Value>: ObservableValue {
-    let subject = ObservableSubject()
-    var subscriptions: [AnyCancellable] = []
-    var pendingRefresh = false
+    public let subject = ObservableSubject()
+    public var subscriptions: [AnyCancellable] = []
+    public var pendingRefresh = false
 
-    var cachedValue: Value? {
+    public var cachedValue: Value? {
         didSet {
             self.subject.send()
         }
@@ -46,12 +46,7 @@ public class State<Value>: ObservableValue {
         self.cachedValue = wrappedValue
     }
 
-    func evaluate() -> Value {
+    public func evaluate() -> Value {
         fatalError("`evaluate()` should never be called on `State`, why is `cachedValue` unknown?")
-    }
-
-    /// Returns a binding to this state vaiable.
-    public var projectedValue: Binding<Value> {
-        return Binding<Value>(self.wrappedValue)
     }
 }

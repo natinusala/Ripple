@@ -14,6 +14,9 @@
     limitations under the License.
 */
 
+import Dispatch
+
+import Backtrace
 import RippleCore
 
 extension App {
@@ -23,6 +26,12 @@ extension App {
     /// entry point of your executable target. Calling this
     /// method directly is not supported.
     public static func main() {
-        let engine = Engine(running: self.init())
+        // Enable backtraces for Linux and Windows
+        Backtrace.install()
+
+        let _ = Engine(running: Self.init())
+
+        // Temporary main loop: consume every messages in the queue
+        dispatchMain()
     }
 }

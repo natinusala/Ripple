@@ -18,35 +18,35 @@ import RippleCore
 
 /// Changes the background color of a view.
 public struct BackgroundColorModifier: ViewModifier {
-    let color: Color
+    @Rippling var color: Color
 
-    public init(color: Color) {
-        self.color = color
+    public init(color: Rippling<Color>) {
+        self._color = color
     }
 
     public static func makeTarget(of modifier: BackgroundColorModifier) -> BackgroundColorTarget {
-        return BackgroundColorTarget(color: modifier.color)
+        return BackgroundColorTarget(observing: modifier._color)
     }
 }
 
 extension View {
     /// Changes the background color of the view.
-    func backgroundColor(_ color: Color) -> some View {
-        return modifier(BackgroundColorModifier(color: color))
+    func backgroundColor(_ color: @autoclosure @escaping Ripplet<Color>) -> some View {
+        return modifier(BackgroundColorModifier(color: .init(color())))
     }
 }
 
 /// Target for background color modifier.
-public class BackgroundColorTarget: ViewModifierTarget, CustomStringConvertible {
-    let color: Color
+public class BackgroundColorTarget: ObservingViewModifierTarget<Color>, CustomStringConvertible {
+    override public func onValueChange(newValue: Color) {
+        // TODO: implement
+    }
 
-    public var boundTarget: TargetNode?
-
-    public init(color: Color) {
-        self.color = color
+    override public func reset() {
+        // TODO: implement
     }
 
     public var description: String {
-        return "backgroundColor=\(self.color)"
+        return "backgroundColor=\(self.observedValue)"
     }
 }

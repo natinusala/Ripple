@@ -16,14 +16,7 @@
 
 import Yoga
 
-public extension Float {
-    static let undefined = YGUndefined
-}
-
-public extension Auto {
-    static let auto = Auto()
-}
-
+/// Represents a percentage from 0 to 100.
 public struct Percentage: Equatable {
     public let value: Float
 
@@ -35,19 +28,27 @@ public struct Percentage: Equatable {
 postfix operator %
 
 public extension Float {
-    static postfix func % (value: Float) -> Percentage {
-        return Percentage(value: value)
+    /// Creates a percentage `Dimension` from a float literal.
+    static postfix func % (value: Float) -> Dimension {
+        return Dimension.percentage(Percentage(value: value))
     }
 }
 
-public struct Auto {}
-
 public typealias DIP = Float
 
-public enum Dimension: CustomStringConvertible {
+/// A dimension which unit can vary.
+public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     case dip(DIP)
     case percentage(Percentage)
     case auto
+
+    public init(floatLiteral: Float) {
+        self = Dimension.dip(floatLiteral)
+    }
+
+    public init(integerLiteral: Int) {
+        self = Dimension.dip(Float(integerLiteral))
+    }
 
     public var description: String {
         switch self {
@@ -59,4 +60,6 @@ public enum Dimension: CustomStringConvertible {
                 return "auto"
         }
     }
+
+    public static let undefined = Dimension.dip(YGUndefined)
 }

@@ -27,8 +27,10 @@ let package = Package(
         .executable(name: "RippleDemo", targets: ["RippleDemo"])
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-server/swift-backtrace.git", .upToNextMajor(from: "1.3.1")),
         .package(url: "https://github.com/OpenCombine/OpenCombine.git", from: "0.12.0"),
         .package(url: "https://github.com/natinusala/Async.git", branch: "a20ccabfdaf740f14b42eadf46fa9baac882078f"),
+        .package(url: "https://github.com/onevcat/Rainbow.git", .upToNextMajor(from: "4.0.0")),
     ],
     targets: [
         .target(
@@ -84,12 +86,14 @@ let package = Package(
                 .product(name: "OpenCombineDispatch", package: "OpenCombine"),
                 "OpenCombine",
                 "Async",
+                "Rainbow",
             ],
             linkerSettings: [.linkedLibrary("pthread")] // XXX: Necessary for OpenCombine to link, why?
         ),
         .target(
             name: "RippleUI",
             dependencies: [
+                .product(name: "Backtrace", package: "swift-backtrace"),
                 "RippleCore",
                 "Yoga",
             ]
