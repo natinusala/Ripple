@@ -14,16 +14,28 @@
     limitations under the License.
 */
 
+import Foundation
+
 import RippleCore
 
 /// A desktop window.
 public struct Window<Content>: Container where Content: View {
     @Rippling var title: String
+    @Rippling var mode: WindowMode
+    @Rippling var graphicsApi: GraphicsAPI
 
     let content: Content
 
-    public init(title: @escaping @autoclosure Ripplet<String>, content: () -> Content) {
+    public init(
+        title: @escaping @autoclosure Ripplet<String>,
+        mode: @escaping @autoclosure Ripplet<WindowMode> = .windowed(1280, 720),
+        graphicsApi: @escaping @autoclosure Ripplet<GraphicsAPI> = .auto,
+        content: () -> Content
+    ) {
         self._title = .init(title())
+        self._mode = .init(mode())
+        self._graphicsApi = .init(graphicsApi())
+
         self.content = content()
     }
 
@@ -32,15 +44,36 @@ public struct Window<Content>: Container where Content: View {
     }
 
     public static func makeTarget(of container: Self) -> WindowTarget {
-        return WindowTarget(title: container.$title)
+        return WindowTarget(
+            title: container._title,
+            mode: container._mode,
+            graphicsApi: container._graphicsApi
+        )
     }
 }
 
 /// Target for a window container.
 public class WindowTarget: ContainerTarget {
     @Rippling var title: String
+    @Rippling var mode: WindowMode
+    @Rippling var graphicsApi: GraphicsAPI
 
-    init(title: Rippling<String>) {
+    let handle: NativeWindow
+
+    init(title: Rippling<String>, mode: Rippling<WindowMode>, graphicsApi: Rippling<GraphicsAPI>) {
         self._title = title
+        self._mode = mode
+        self._graphicsApi = graphicsApi
+
+        do {
+            self.handle = try getContext().platform.createWindow(
+                title: title.value,
+                mode: mode.value,
+                graphicsApi: graphicsApi.value
+            )
+        } catch {
+            Logger.error("Cannot create window: \(error.qualifiedName)")
+            exit(-1)
+        }
     }
 }

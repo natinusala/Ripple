@@ -66,9 +66,4 @@ public class Rippling<Value>: ObservableValue {
     public var wrappedValue: Value {
         return self.value
     }
-
-    /// Returns the rippling object.
-    public var projectedValue: Rippling<Value> {
-        return self
-    }
 }

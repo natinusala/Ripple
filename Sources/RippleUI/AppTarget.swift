@@ -19,6 +19,7 @@ import Dispatch
 
 import Backtrace
 import RippleCore
+import CRippleUI
 
 extension App where Target == AppTarget {
     /// Main entry point for an app.
@@ -51,10 +52,16 @@ public extension App {
 }
 
 /// The target of a Ripple app.
-public class AppTarget: TargetNode {
+public class AppTarget: TargetNode, Context {
     public let type: TargetType = .app
 
     public var children: [TargetNode] = []
+
+    /// Has the user requested that the app exits?
+    var exitRequested = false
+
+    var canvas: Canvas?
+    let platform: Platform
 
     /// Creates a new app target.
     init() throws {
@@ -62,6 +69,10 @@ public class AppTarget: TargetNode {
         guard let platform = try createPlatform() else {
             throw AppError.noPlatformFound
         }
+        self.platform = platform
+
+        // Register ourself as running context
+        sharedContext = self
     }
 
     public func insert(child: TargetNode, at position: UInt?) {
@@ -83,10 +94,55 @@ public class AppTarget: TargetNode {
         fatalError("Removing containers from an app target is not implemented yet")
     }
 
+    /// Must the app exit on next frame?
+    var mustExit: Bool {
+        // TODO: handle SIGINT to exit gracefully
+        return exitRequested
+    }
+
     /// Runs the app until it exits.
     func run() {
-        // Temporary main loop: consume every messages in the queue
-        dispatchMain()
+        while !self.mustExit {
+            let beginFrameTime = Date()
+
+            // Poll events
+            self.platform.poll()
+
+            // Run one frame
+            self.frame()
+
+            // Consume all messages in main queue
+            drainMainQueue()
+
+            // Sleep for however much time is needed
+            let frameTime = 0.016666666 // TODO: make it an env variable
+            if frameTime > 0 {
+                let endFrameTime = Date()
+                let currentFrameTime = beginFrameTime.distance(to: endFrameTime)
+                var sleepAmount: TimeInterval = 0
+
+                // Only sleep if the frame took less time to render
+                // than desired frame time
+                if currentFrameTime < frameTime {
+                    sleepAmount = frameTime - currentFrameTime
+                }
+
+                if sleepAmount > 0 {
+                    Thread.sleep(forTimeInterval: sleepAmount)
+                }
+            }
+        }
+
+        Logger.info("Exiting...")
+    }
+
+    /// Runs the app for one frame.
+    func frame() {
+
+    }
+
+    func exit() {
+        self.exitRequested = true
     }
 }
 
@@ -94,3 +150,34 @@ public class AppTarget: TargetNode {
 enum AppError: Error {
     case noPlatformFound
 }
+
+/// Runs everything in the main queue.
+func drainMainQueue() {
+    // XXX: Dispatch does not expose a way to drain the main queue
+    // without parking the main thread, so we need to use obscure
+    // CoreFoundation / Cocoa functions.
+    // See https://github.com/apple/swift-corelibs-libdispatch/blob/macosforge/trac/ticket/38.md
+    _dispatch_main_queue_callback_4CF(nil)
+}
+
+/// Represents the currently running app. Used to get global
+/// objects as well as manipulate the app.
+protocol Context {
+    /// Currently running platform.
+    var platform: Platform { get }
+
+    /// The canvas used by views to draw themselves.
+    /// Set by the `Container` implementation when it gets created.
+    var canvas: Canvas? { get set }
+
+    /// Exits the app on next frame.
+    func exit()
+}
+
+/// Returns the `Context` instance of the currently running app.
+func getContext() -> Context {
+    return sharedContext
+}
+
+/// Currently running app as `Context`.
+var sharedContext: Context!

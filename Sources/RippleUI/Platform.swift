@@ -50,9 +50,12 @@ public enum GraphicsAPI {
     /// OpenGL.
     case gl
 
-    /// Selects the first available graphics API, or returns `nil` if none is
-    /// available.
-    public static func findFirstAvailable() -> GraphicsAPI? {
+    /// Let Ripple select the best one.
+    case auto
+
+    /// Selects the best available graphics API, or raises an exception if
+    /// none was found.
+    public static func getDefault() throws -> GraphicsAPI {
         // TODO: only return OpenGL if it's actually available
         return .gl
     }

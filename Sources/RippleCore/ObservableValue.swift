@@ -133,7 +133,7 @@ extension ObservableValue {
 
     /// Primary access point for the observed value. Will return the cached value
     /// if known or re-evaluate the observed value otherwise.
-    var value: Value {
+    public var value: Value {
         // Register this access
         if let entry = observableRecordingStack.last {
             entry.subjects.insert(self.subject)
