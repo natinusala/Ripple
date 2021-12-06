@@ -76,4 +76,12 @@ public class WindowTarget: ContainerTarget {
             exit(-1)
         }
     }
+
+    override var shouldClose: Bool {
+        return self.handle.shouldClose
+    }
+
+    override func swapBuffers() {
+        self.handle.swapBuffers()
+    }
 }

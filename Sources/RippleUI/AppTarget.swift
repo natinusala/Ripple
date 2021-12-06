@@ -63,6 +63,8 @@ public class AppTarget: TargetNode, Context {
     var canvas: Canvas?
     let platform: Platform
 
+    var container: ContainerTarget?
+
     /// Creates a new app target.
     init() throws {
         // Init platform
@@ -88,6 +90,9 @@ public class AppTarget: TargetNode, Context {
 
         // Add the child
         self.children = [child]
+
+        // Set it as our one container
+        self.container = child as? ContainerTarget
     }
 
     public func remove(child: TargetNode) {
@@ -138,7 +143,13 @@ public class AppTarget: TargetNode, Context {
 
     /// Runs the app for one frame.
     func frame() {
+        // Handle window "X" button
+        if self.container?.shouldClose ?? false {
+            getContext().exit()
+        }
 
+        // Swap buffers
+        self.container?.swapBuffers()
     }
 
     func exit() {
