@@ -14,57 +14,116 @@
     limitations under the License.
 */
 
-import RippleCore
+import OpenCombine
 
+import RippleCore
 import Yoga
 
 /// Sets the margin of a view.
 public struct MarginModifier: ViewModifier {
-    public typealias Margin = (top: DIP, right: DIP, bottom: DIP, left: DIP)
+    @Rippling var top: Float
+    @Rippling var right: Float
+    @Rippling var bottom: Float
+    @Rippling var left: Float
 
-    let margin: Margin
-
-    public init(margin: Margin) {
-        self.margin = margin
+    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+        self._top = top
+        self._right = right
+        self._bottom = bottom
+        self._left = left
     }
 
     public static func makeTarget(of modifier: MarginModifier) -> MarginTarget {
-        return MarginTarget(margin: modifier.margin)
+        return MarginTarget(top: modifier._top, right: modifier._right, bottom: modifier._bottom, left: modifier._left)
     }
 }
 
 public extension View {
     /// Sets the margin of the view for all 4 edges.
-    func margin(_ margin: DIP) -> some View {
-        return modifier(MarginModifier(margin: (top: margin, right: margin, bottom: margin, left: margin)))
+    func margin(_ margin: @autoclosure @escaping Ripplet<DIP>) -> some View {
+        let rippling = Rippling<DIP>(margin())
+        return modifier(MarginModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
     }
 
     /// Sets the margin of the view for specified edges.
-    func margin(top: DIP = 0, right: DIP = 0, bottom: DIP = 0, left: DIP = 0) -> some View {
-        return modifier(MarginModifier(margin: (top: top, right: right, bottom: bottom, left: left)))
+    func margin(
+        top: @autoclosure @escaping Ripplet<DIP> = 0,
+        right: @autoclosure @escaping Ripplet<DIP> = 0,
+        bottom: @autoclosure @escaping Ripplet<DIP> = 0,
+        left: @autoclosure @escaping Ripplet<DIP> = 0
+    ) -> some View {
+        return modifier(
+            MarginModifier(
+                top: .init(top()),
+                right: .init(right()),
+                bottom: .init(bottom()),
+                left: .init(left())
+            )
+        )
     }
 }
 
 /// Target for margin modifier.
 public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
-    let margin: MarginModifier.Margin
+    @Rippling var top: DIP
+    @Rippling var right: DIP
+    @Rippling var bottom: DIP
+    @Rippling var left: DIP
+
+    var topSub: AnyCancellable?
+    var rightSub: AnyCancellable?
+    var bottomSub: AnyCancellable?
+    var leftSub: AnyCancellable?
 
     public var boundTarget: TargetNode?
 
-    public init(margin: MarginModifier.Margin) {
-        self.margin = margin
-    }
+    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+        self._top = top
+        self._right = right
+        self._bottom = bottom
+        self._left = left
 
-    public var description: String {
-        return "margin=\(self.margin)"
+        self.topSub = top.observe { newValue in
+            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+                YGNodeStyleSetMargin(ygNode, YGEdgeTop, newValue)
+            }
+        }
+        self.rightSub = right.observe { newValue in
+            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+                YGNodeStyleSetMargin(ygNode, YGEdgeRight, newValue)
+            }
+        }
+        self.bottomSub = bottom.observe { newValue in
+            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+                YGNodeStyleSetMargin(ygNode, YGEdgeBottom, newValue)
+            }
+        }
+        self.leftSub = left.observe { newValue in
+            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+                YGNodeStyleSetMargin(ygNode, YGEdgeLeft, newValue)
+            }
+        }
     }
 
     public func apply() {
         if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetMargin(ygNode, YGEdgeTop, self.margin.top)
-            YGNodeStyleSetMargin(ygNode, YGEdgeRight, self.margin.right)
-            YGNodeStyleSetMargin(ygNode, YGEdgeBottom, self.margin.bottom)
-            YGNodeStyleSetMargin(ygNode, YGEdgeLeft, self.margin.left)
+            YGNodeStyleSetMargin(ygNode, YGEdgeTop, self.top)
+            YGNodeStyleSetMargin(ygNode, YGEdgeRight, self.right)
+            YGNodeStyleSetMargin(ygNode, YGEdgeBottom, self.bottom)
+            YGNodeStyleSetMargin(ygNode, YGEdgeLeft, self.left)
         }
+    }
+
+    public func reset() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetMargin(ygNode, YGEdgeTop, 0)
+            YGNodeStyleSetMargin(ygNode, YGEdgeRight, 0)
+            YGNodeStyleSetMargin(ygNode, YGEdgeBottom, 0)
+            YGNodeStyleSetMargin(ygNode, YGEdgeLeft, 0)
+        }
+    }
+
+    public var description: String {
+        return "margin=(top: \(self.top), right: \(self.right), bottom: \(self.bottom), left: \(self.left))"
     }
 }

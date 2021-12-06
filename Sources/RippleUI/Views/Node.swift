@@ -20,17 +20,15 @@ import Yoga
 
 /// A view containing a layout node, with a position and dimensions.
 public struct Node<Content>: View where Content: View {
-    public typealias ContentBuilder = () -> Content
-
-    @ViewBuilder let content: ContentBuilder
+    let content: Content
 
     /// Creates a new node.
-    public init(@ViewBuilder content: @escaping ContentBuilder) {
-        self.content = content
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
     }
 
     public var body: some View {
-        self.content()
+        self.content
     }
 
     public static func makeOutput(of view: Node<Content>) -> [Output] {

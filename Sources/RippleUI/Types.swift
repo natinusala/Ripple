@@ -16,7 +16,8 @@
 
 import Yoga
 
-/// Represents a percentage from 0 to 100.
+/// A percentage, typically ranging from 0 to 100, but can also
+/// represent negative percentages or more than 100%.
 public struct Percentage: Equatable {
     public let value: Float
 
@@ -30,7 +31,7 @@ postfix operator %
 public extension Float {
     /// Creates a percentage `Dimension` from a float literal.
     static postfix func % (value: Float) -> Dimension {
-        return Dimension.percentage(Percentage(value: value))
+        return .percentage(Percentage(value: value))
     }
 }
 
@@ -43,11 +44,11 @@ public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, Expre
     case auto
 
     public init(floatLiteral: Float) {
-        self = Dimension.dip(floatLiteral)
+        self = .dip(floatLiteral)
     }
 
     public init(integerLiteral: Int) {
-        self = Dimension.dip(Float(integerLiteral))
+        self = .dip(Float(integerLiteral))
     }
 
     public var description: String {

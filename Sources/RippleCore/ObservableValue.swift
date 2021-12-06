@@ -67,7 +67,7 @@ extension ObservableValue {
     /// Returns a Combine subscription that can be cancelled anytime using `cancel()`.
     /// The subscription must be stored, otherwise it will immediately
     /// be cancelled.
-    func observe(closure: @escaping (Value) -> ()) -> AnyCancellable {
+    public func observe(closure: @escaping (Value) -> ()) -> AnyCancellable {
         self.subject
             .receive(on: DispatchQueue.main)
             .sink {

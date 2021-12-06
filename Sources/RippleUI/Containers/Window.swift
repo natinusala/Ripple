@@ -16,6 +16,7 @@
 
 import RippleCore
 
+/// A desktop window.
 public struct Window<Content>: Container where Content: View {
     @Rippling var title: String
 

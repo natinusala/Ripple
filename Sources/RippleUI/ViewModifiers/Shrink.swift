@@ -15,38 +15,43 @@
 */
 
 import RippleCore
+import Yoga
 
 /// Changes the shrink factor of a view.
 public struct ShrinkModifier: ViewModifier {
-    let shrink: Float
+    @Rippling var shrink: Float
 
-    public init(shrink: Float) {
-        self.shrink = shrink
+    public init(shrink: Rippling<Float>) {
+        self._shrink = shrink
     }
 
     public static func makeTarget(of modifier: ShrinkModifier) -> ShrinkTarget {
-        return ShrinkTarget(shrink: modifier.shrink)
+        return ShrinkTarget(observing: modifier._shrink)
     }
 }
 
 public extension View {
     /// Changes the shrink factor of the view.
-    func shrink(_ shrink: Float) -> some View {
-        return modifier(ShrinkModifier(shrink: shrink))
+    func shrink(_ shrink: @autoclosure @escaping Ripplet<Float>) -> some View {
+        return modifier(ShrinkModifier(shrink: .init(shrink())))
     }
 }
 
 /// Target for shrink modifier.
-public class ShrinkTarget: ViewModifierTarget, CustomStringConvertible {
-    let shrink: Float
+public class ShrinkTarget: ObservingViewModifierTarget<Float>, CustomStringConvertible {
+    override public func onValueChange(newValue: Float) {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetFlexShrink(ygNode, newValue)
+        }
+    }
 
-    public var boundTarget: TargetNode?
-
-    public init(shrink: Float) {
-        self.shrink = shrink
+    override public func reset() {
+        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
+            YGNodeStyleSetFlexShrink(ygNode, YGUndefined)
+        }
     }
 
     public var description: String {
-        return "shrink=\(self.shrink)"
+        return "shrink=\(self.observedValue)"
     }
 }
