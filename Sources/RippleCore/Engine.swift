@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import Foundation
+
 /// The engine is responsible for parsing the app tree, creating targets and managing
 /// target nodes insertions / removals.
 ///
@@ -29,7 +31,8 @@ public class Engine<A: App> {
         let output = A.makeOutput(of: app)[0]
 
         guard let target = output.makeTarget() else {
-            fatalError("App does not have a target, cannot continue")
+            Logger.error("Programming error: app does not have a target, cannot continue")
+            exit(-1)
         }
 
         self.target = target as! A.Target

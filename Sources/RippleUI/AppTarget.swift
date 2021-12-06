@@ -14,16 +14,39 @@
     limitations under the License.
 */
 
+import Foundation
 import Dispatch
 
+import Backtrace
 import RippleCore
+
+extension App where Target == AppTarget {
+    /// Main entry point for an app.
+    ///
+    /// Use the `@main` attribute on the app to mark it as the main
+    /// entry point of your executable target. Calling this
+    /// method directly is not supported.
+    public static func main() {
+        // Enable backtraces for Linux and Windows
+        Backtrace.install()
+
+        let engine = Engine(running: Self.init())
+        engine.target.run()
+    }
+}
 
 public extension App {
     typealias Target = AppTarget
 
-    /// Override the default `Never` target to provide our own instead.
+    /// Overrides the default `Never` target to provide our own instead.
     static func makeTarget(of app: Self) -> AppTarget {
-        return AppTarget()
+        do {
+            return try AppTarget()
+        }
+        catch {
+            Logger.error("Cannot initialize app: \(error.qualifiedName)")
+            exit(-1)
+        }
     }
 }
 
@@ -32,6 +55,14 @@ public class AppTarget: TargetNode {
     public let type: TargetType = .app
 
     public var children: [TargetNode] = []
+
+    /// Creates a new app target.
+    init() throws {
+        // Init platform
+        guard let platform = try createPlatform() else {
+            throw AppError.noPlatformFound
+        }
+    }
 
     public func insert(child: TargetNode, at position: UInt?) {
         // Only allow one child container for now
@@ -57,4 +88,9 @@ public class AppTarget: TargetNode {
         // Temporary main loop: consume every messages in the queue
         dispatchMain()
     }
+}
+
+/// Errors that can occur when the app is initialized.
+enum AppError: Error {
+    case noPlatformFound
 }

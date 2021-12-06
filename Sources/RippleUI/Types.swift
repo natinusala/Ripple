@@ -43,6 +43,8 @@ public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, Expre
     case percentage(Percentage)
     case auto
 
+    public static let undefined = Dimension.dip(YGUndefined)
+
     public init(floatLiteral: Float) {
         self = .dip(floatLiteral)
     }
@@ -61,6 +63,4 @@ public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, Expre
                 return "auto"
         }
     }
-
-    public static let undefined = Dimension.dip(YGUndefined)
 }

@@ -14,14 +14,14 @@
     limitations under the License.
 */
 
-// Those flags are used to toggle debug messages of various components of the
-// library at compile time. Please set them all to `false` before commiting.
+#include <skia_loftwing/include/c/gr_context.h>
+#include <skia_loftwing/include/c/sk_types.h>
+#include <skia_loftwing/include/c/sk_canvas.h>
+#include <skia_loftwing/include/c/sk_surface.h>
+#include <skia_loftwing/include/c/sk_colorspace.h>
+#include <skia_loftwing/include/c/sk_paint.h>
+#include <skia_loftwing/include/c/sk_image.h>
+#include <skia_loftwing/include/c/sk_bitmap.h>
+#include <skia_loftwing/include/c/sk_pixmap.h>
 
-/// Enables core logs (engine, mounting / unmounting, view updates...).
-let debugCore = true
-
-/// Enables target logs.
-let debugTarget = true
-
-/// Enables logs for graphics API (OpenGL, Vulkan...)
-let debugGraphicsAPI = false
+static const uint32_t kAll_GrBackendState = 0xffffffff;

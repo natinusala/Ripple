@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import Foundation
+
 /// A Ripple application.
 ///
 /// An app contains one single `Container`, which is the top-level
@@ -54,7 +56,8 @@ extension App {
 public extension App {
     /// Default implementation of `makeTarget(of:)`.
     static func makeTarget(of app: Self) -> Never {
-        fatalError("Apps do not have a target by default, please import a target library before continuing")
+        Logger.error("Programming error: apps do not have a target by default, please import a target library")
+        exit(-1)
     }
 }
 

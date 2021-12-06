@@ -21,6 +21,9 @@ import PackageDescription
 /// Should debug features of Yoga be enabled?
 let debugYoga = false
 
+/// Should we link against the debug Skia build?
+let debugSkia = false
+
 let package = Package(
     name: "Ripple",
     products: [
@@ -91,11 +94,30 @@ let package = Package(
             linkerSettings: [.linkedLibrary("pthread")] // XXX: Necessary for OpenCombine to link, why?
         ),
         .target(
+            name: "CGlad",
+            path: "External/CGlad"
+        ),
+        .target(
+            name: "Glad",
+            dependencies: ["CGlad"],
+            path: "External/Glad"
+        ),
+        .systemLibrary(name: "GLFW", path: "External/GLFW", pkgConfig: "glfw3"),
+        .systemLibrary(name: "Skia", path: "External/Skia", pkgConfig: debugSkia ? "skia_loftwing_debug" : "skia_loftwing"),
+        .target(
+            name: "CRippleUI",
+            dependencies: ["CGlad"]
+        ),
+        .target(
             name: "RippleUI",
             dependencies: [
                 .product(name: "Backtrace", package: "swift-backtrace"),
                 "RippleCore",
                 "Yoga",
+                "CRippleUI",
+                "GLFW",
+                "Glad",
+                "Skia",
             ]
         ),
         .target(

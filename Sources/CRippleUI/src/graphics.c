@@ -14,20 +14,9 @@
     limitations under the License.
 */
 
-import Backtrace
-import RippleCore
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-extension App where Target == AppTarget {
-    /// Main entry point for an app.
-    ///
-    /// Use the `@main` attribute on the app to mark it as the main
-    /// entry point of your executable target. Calling this
-    /// method directly is not supported.
-    public static func main() {
-        // Enable backtraces for Linux and Windows
-        Backtrace.install()
-
-        let engine = Engine(running: Self.init())
-        engine.target.run()
-    }
+void gladLoadGLLoaderFromGLFW() {
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 }
