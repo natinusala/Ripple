@@ -19,12 +19,12 @@
 ///
 /// The target library should provide a main function to initialize the engine and run the
 /// created target app.
-public class Engine {
+public class Engine<A: App> {
     let root: MountedNode
-    let target: TargetNode
+    public let target: A.Target
 
     /// Creates a new engine running the given app.
-    public init<A: App>(running app: A) {
+    public init(running app: A) {
         // Mount the root node of the tree: the app
         let output = A.makeOutput(of: app)[0]
 
@@ -32,7 +32,7 @@ public class Engine {
             fatalError("App does not have a target, cannot continue")
         }
 
-        self.target = target
+        self.target = target as! A.Target
         self.root = MountedNode(output: output, target: target)
 
         if debugCore {

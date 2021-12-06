@@ -14,12 +14,10 @@
     limitations under the License.
 */
 
-import Dispatch
-
 import Backtrace
 import RippleCore
 
-extension App {
+extension App where Target == AppTarget {
     /// Main entry point for an app.
     ///
     /// Use the `@main` attribute on the app to mark it as the main
@@ -29,9 +27,7 @@ extension App {
         // Enable backtraces for Linux and Windows
         Backtrace.install()
 
-        let _ = Engine(running: Self.init())
-
-        // Temporary main loop: consume every messages in the queue
-        dispatchMain()
+        let engine = Engine(running: Self.init())
+        engine.target.run()
     }
 }

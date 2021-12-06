@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import Dispatch
+
 import RippleCore
 
 public extension App {
@@ -48,5 +50,11 @@ public class AppTarget: TargetNode {
 
     public func remove(child: TargetNode) {
         fatalError("Removing containers from an app target is not implemented yet")
+    }
+
+    /// Runs the app until it exits.
+    func run() {
+        // Temporary main loop: consume every messages in the queue
+        dispatchMain()
     }
 }
