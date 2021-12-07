@@ -53,7 +53,7 @@ public struct Window<Content>: Container where Content: View {
 }
 
 /// Target for a window container.
-public class WindowTarget: ContainerTarget {
+public class WindowTarget: ContainerTarget, FrameTarget {
     @Rippling var title: String
     @Rippling var mode: WindowMode
     @Rippling var graphicsApi: GraphicsAPI
@@ -77,11 +77,13 @@ public class WindowTarget: ContainerTarget {
         }
     }
 
-    override var shouldClose: Bool {
-        return self.handle.shouldClose
-    }
+    func frame() {
+        // Handle window "X" button
+        if self.handle.shouldClose {
+            getContext().exit()
+        }
 
-    override func swapBuffers() {
+        // Swap buffers
         self.handle.swapBuffers()
     }
 }

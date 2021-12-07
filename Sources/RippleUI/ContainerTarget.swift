@@ -40,12 +40,4 @@ public class ContainerTarget: TargetNode {
     public func remove(child: TargetNode) {
 
     }
-
-    /// Returns `true` if the OS has requested the container to close.
-    var shouldClose: Bool {
-        return false
-    }
-
-    /// Swap graphics buffers.
-    func swapBuffers() {}
 }

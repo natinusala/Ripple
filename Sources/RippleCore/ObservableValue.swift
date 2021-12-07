@@ -30,7 +30,6 @@ public protocol ObservableValue: AnyObject {
 
     /// The cached value, aka the last known value returned by `evaluate()`.
     /// `nil` means "unknown".
-    /// TODO: consider using `@Published` on `cachedValue` to replace `subject` (once everything is thoroughly tested)
     var cachedValue: Value? { get set }
 
     /// Combine subject fired when the cached value has changed.
