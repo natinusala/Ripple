@@ -23,14 +23,22 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
     public let type: TargetType = .view
 
     public var children: [TargetNode] = []
+    public var parent: TargetNode?
 
     private let ygNode: YGNodeRef
+
+    public private(set) var layout = Rect(
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+    )
 
     init() {
         self.ygNode = YGNodeNew()
     }
 
-    public func insert(child: TargetNode, at position: UInt?) {
+    public func insert(child: inout TargetNode, at position: UInt?) {
         // Ensure the target node is a view
         guard let view = child as? ViewTarget else {
             fatalError("View targets can only contain views")
@@ -39,6 +47,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
         let position = position ?? UInt(self.children.count)
 
         self.children.insert(child, at: Int(position))
+        child.parent = self
+
         YGNodeInsertChild(self.ygNode, view.ygNode, UInt32(position))
     }
 
@@ -46,13 +56,58 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
 
     }
 
+    /// Called when the parent view layout changes.
+    private func updateLayout(parentX: DIP, parentY: DIP) {
+        self.layout = Rect(
+            x: parentX + YGNodeLayoutGetLeft(self.ygNode),
+            y: parentY + YGNodeLayoutGetTop(self.ygNode),
+            width: YGNodeLayoutGetWidth(self.ygNode),
+            height: YGNodeLayoutGetHeight(self.ygNode)
+        )
+
+        for child in self.children {
+            if let child = child as? ViewTarget {
+                child.updateLayout(parentX: self.layout.x, parentY: self.layout.y)
+            }
+        }
+    }
+
+    /// Calculates layout of this view, either by calculating layout of its parent
+    /// or calculating its layout directly if the view doesn't have a parent.
+    private func calculateLayout() {
+        if let parent = self.parent as? ViewTarget {
+            parent.calculateLayout()
+        } else {
+            // Use Yoga to calculate layout
+            YGNodeCalculateLayout(self.ygNode, YGUndefined, YGUndefined, YGDirectionLTR)
+
+            // Propagate newly calculated layout to our properties and all our children
+            self.updateLayout(parentX: 0, parentY: 0)
+        }
+    }
+
     open func frame(canvas: Canvas) {
-        // By default, only draw ourselves
+        // Call layout if needed
+        if YGNodeIsDirty(self.ygNode) {
+            self.calculateLayout()
+        }
+
+        // Draw ourselves
         self.draw(canvas: canvas)
+
+        // Draw every child
+        for view in self.children {
+            if let drawableTarget = view as? DrawableTarget {
+                drawableTarget.frame(canvas: canvas)
+            } else if let frameTarget = view as? FrameTarget {
+                frameTarget.frame()
+            }
+        }
     }
 
     open func draw(canvas: Canvas) {
-
+        let paint = Paint(color: .blue)
+        canvas.drawRect(self.layout, paint: paint)
     }
 
     var axis: Axis {

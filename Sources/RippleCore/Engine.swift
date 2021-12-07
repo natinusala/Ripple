@@ -83,9 +83,9 @@ class MountedNode: CustomStringConvertible {
         for child in self.output.makeBody() {
             // Create and insert target if any
             let target = child.makeTarget()
-            if let childTarget = target {
+            if var childTarget = target {
                 // Connect the target to the last view with a target
-                self.insertChildTarget(childTarget, in: self)
+                self.insertChildTarget(&childTarget, in: self)
 
                 // If the child is non-shallow, apply it its own modifiers
                 if !child.isShallow {
@@ -111,12 +111,12 @@ class MountedNode: CustomStringConvertible {
 
     /// Inserts the target to the upper-most parent that also has a target.
     /// Will fatal error if no parent was found with a target after traversing the whole tree.
-    func insertChildTarget(_ target: TargetNode, in parent: MountedNode, at position: UInt? = nil) {
+    func insertChildTarget(_ target: inout TargetNode, in parent: MountedNode, at position: UInt? = nil) {
         if let parentTarget = parent.target {
-            parentTarget.insert(child: target, at: position)
+            parentTarget.insert(child: &target, at: position)
         } else {
             if let grandParent = parent.parent {
-                self.insertChildTarget(target, in: grandParent, at: position)
+                self.insertChildTarget(&target, in: grandParent, at: position)
             } else {
                 fatalError("Cannot attach target \(target) to any parent (tried \(parent) last)")
             }

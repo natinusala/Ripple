@@ -31,10 +31,14 @@ public protocol TargetNode {
     /// Called when a child node needs to be inserted in this node
     /// at the given position. If position is `nil`, the child must
     /// be inserted at the end of the list.
-    func insert(child: TargetNode, at position: UInt?)
+    /// `parent` property of the child must be set to `self`.
+    func insert(child: inout TargetNode, at position: UInt?)
 
     /// Called when a child node needs to be removed from this node.
     func remove(child: TargetNode)
+
+    /// Parent of this node.
+    var parent: TargetNode? { get set }
 
     /// Children of this node.
     var children: [TargetNode] { get }
@@ -51,11 +55,20 @@ extension Never {
         fatalError("`children` called on `Never`")
     }
 
-    public func insert(child: TargetNode, at position: UInt?) {
+    public func insert(child: inout TargetNode, at position: UInt?) {
         fatalError("`insert(child:at:)` called on `Never`")
     }
 
     public func remove(child: TargetNode) {
         fatalError("`remove(child:)` called on `Never`")
+    }
+
+    public var parent: TargetNode? {
+        get {
+            fatalError("`parent` called on `Never`")
+        }
+        set {
+            fatalError("`parent` called on `Never`")
+        }
     }
 }

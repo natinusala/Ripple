@@ -56,6 +56,7 @@ public class AppTarget: TargetNode, FrameTarget, Context {
     public let type: TargetType = .app
 
     public var children: [TargetNode] = []
+    public var parent: TargetNode?
 
     /// Has the user requested that the app exits?
     var exitRequested = false
@@ -75,7 +76,7 @@ public class AppTarget: TargetNode, FrameTarget, Context {
         sharedContext = self
     }
 
-    public func insert(child: TargetNode, at position: UInt?) {
+    public func insert(child: inout TargetNode, at position: UInt?) {
         // Only allow one child container for now
         if !self.children.isEmpty {
             fatalError("App targets can only have one container")
@@ -88,6 +89,7 @@ public class AppTarget: TargetNode, FrameTarget, Context {
 
         // Add the child
         self.children = [child]
+        child.parent = self
     }
 
     public func remove(child: TargetNode) {

@@ -21,8 +21,9 @@ public class ContainerTarget: TargetNode {
     public let type: TargetType = .container
 
     public var children: [TargetNode] = []
+    public var parent: TargetNode?
 
-    public func insert(child: TargetNode, at position: UInt?) {
+    public func insert(child: inout TargetNode, at position: UInt?) {
         // Only allow one child view for now
         if !self.children.isEmpty {
             fatalError("Container targets can only have one view")
@@ -35,6 +36,7 @@ public class ContainerTarget: TargetNode {
 
         // Add the child
         self.children = [child]
+        child.parent = self
     }
 
     public func remove(child: TargetNode) {
