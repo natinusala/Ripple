@@ -52,7 +52,7 @@ public extension App {
 }
 
 /// The target of a Ripple app.
-public class AppTarget: TargetNode, Context {
+public class AppTarget: TargetNode, FrameTarget, Context {
     public let type: TargetType = .app
 
     public var children: [TargetNode] = []
@@ -71,7 +71,7 @@ public class AppTarget: TargetNode, Context {
         }
         self.platform = platform
 
-        // Register ourself as running context
+        // Register ourselves as running context
         sharedContext = self
     }
 

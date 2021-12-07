@@ -41,25 +41,14 @@ public extension View {
 /// Target for height modifier.
 public class HeightTarget: ObservingViewModifierTarget<Dimension>, CustomStringConvertible {
     override public func onValueChange(newValue: Dimension) {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            switch newValue {
-                case let .dip(dip):
-                    YGNodeStyleSetMinHeight(ygNode, dip)
-                    YGNodeStyleSetHeight(ygNode, dip)
-                case let .percentage(percentage):
-                    YGNodeStyleSetMinHeightPercent(ygNode, percentage.value)
-                    YGNodeStyleSetHeightPercent(ygNode, percentage.value)
-                case .auto:
-                    YGNodeStyleSetMinHeight(ygNode, YGUndefined)
-                    YGNodeStyleSetHeightAuto(ygNode)
-            }
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.height = newValue
         }
     }
 
     override public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetMinHeight(ygNode, YGUndefined)
-            YGNodeStyleSetHeight(ygNode, YGUndefined)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.height = .undefined
         }
     }
 

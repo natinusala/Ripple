@@ -21,12 +21,12 @@ import Yoga
 
 /// Sets the padding of a view.
 public struct PaddingModifier: ViewModifier {
-    @Rippling var top: Float
-    @Rippling var right: Float
-    @Rippling var bottom: Float
-    @Rippling var left: Float
+    @Rippling var top: Dimension
+    @Rippling var right: Dimension
+    @Rippling var bottom: Dimension
+    @Rippling var left: Dimension
 
-    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+    public init(top: Rippling<Dimension>, right: Rippling<Dimension>, bottom: Rippling<Dimension>, left: Rippling<Dimension>) {
         self._top = top
         self._right = right
         self._bottom = bottom
@@ -40,17 +40,17 @@ public struct PaddingModifier: ViewModifier {
 
 public extension View {
     /// Sets the padding of the view for all 4 edges.
-    func padding(_ padding: @autoclosure @escaping Ripplet<DIP>) -> some View {
-        let rippling = Rippling<DIP>(padding())
+    func padding(_ padding: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+        let rippling = Rippling<Dimension>(padding())
         return modifier(PaddingModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
     }
 
     /// Sets the padding of the view for specified edges.
     func padding(
-        top: @autoclosure @escaping Ripplet<DIP> = 0,
-        right: @autoclosure @escaping Ripplet<DIP> = 0,
-        bottom: @autoclosure @escaping Ripplet<DIP> = 0,
-        left: @autoclosure @escaping Ripplet<DIP> = 0
+        top: @autoclosure @escaping Ripplet<Dimension> = 0,
+        right: @autoclosure @escaping Ripplet<Dimension> = 0,
+        bottom: @autoclosure @escaping Ripplet<Dimension> = 0,
+        left: @autoclosure @escaping Ripplet<Dimension> = 0
     ) -> some View {
         return modifier(
             PaddingModifier(
@@ -65,10 +65,10 @@ public extension View {
 
 /// Target for padding modifier.
 public class PaddingTarget: ViewModifierTarget, CustomStringConvertible {
-    @Rippling var top: DIP
-    @Rippling var right: DIP
-    @Rippling var bottom: DIP
-    @Rippling var left: DIP
+    @Rippling var top: Dimension
+    @Rippling var right: Dimension
+    @Rippling var bottom: Dimension
+    @Rippling var left: Dimension
 
     var topSub: AnyCancellable?
     var rightSub: AnyCancellable?
@@ -77,49 +77,49 @@ public class PaddingTarget: ViewModifierTarget, CustomStringConvertible {
 
     public var boundTarget: TargetNode?
 
-    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+    public init(top: Rippling<Dimension>, right: Rippling<Dimension>, bottom: Rippling<Dimension>, left: Rippling<Dimension>) {
         self._top = top
         self._right = right
         self._bottom = bottom
         self._left = left
 
         self.topSub = top.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetPadding(ygNode, YGEdgeTop, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.paddingTop = newValue
             }
         }
         self.rightSub = right.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetPadding(ygNode, YGEdgeRight, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.paddingRight = newValue
             }
         }
         self.bottomSub = bottom.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetPadding(ygNode, YGEdgeBottom, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.paddingBottom = newValue
             }
         }
         self.leftSub = left.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetPadding(ygNode, YGEdgeLeft, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.paddingLeft = newValue
             }
         }
     }
 
     public func apply() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetPadding(ygNode, YGEdgeTop, self.top)
-            YGNodeStyleSetPadding(ygNode, YGEdgeRight, self.right)
-            YGNodeStyleSetPadding(ygNode, YGEdgeBottom, self.bottom)
-            YGNodeStyleSetPadding(ygNode, YGEdgeLeft, self.left)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.paddingTop = self.top
+            layoutTarget.paddingRight = self.right
+            layoutTarget.paddingBottom = self.bottom
+            layoutTarget.paddingLeft = self.left
         }
     }
 
     public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetPadding(ygNode, YGEdgeTop, 0)
-            YGNodeStyleSetPadding(ygNode, YGEdgeRight, 0)
-            YGNodeStyleSetPadding(ygNode, YGEdgeBottom, 0)
-            YGNodeStyleSetPadding(ygNode, YGEdgeLeft, 0)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.paddingTop = .undefined
+            layoutTarget.paddingRight = .undefined
+            layoutTarget.paddingBottom = .undefined
+            layoutTarget.paddingLeft = .undefined
         }
     }
 

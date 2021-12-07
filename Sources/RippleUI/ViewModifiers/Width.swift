@@ -41,25 +41,14 @@ public extension View {
 /// Target for width modifier.
 public class WidthTarget: ObservingViewModifierTarget<Dimension>, CustomStringConvertible {
     override public func onValueChange(newValue: Dimension) {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            switch newValue {
-                case let .dip(dip):
-                    YGNodeStyleSetMinWidth(ygNode, dip)
-                    YGNodeStyleSetWidth(ygNode, dip)
-                case let .percentage(percentage):
-                    YGNodeStyleSetMinWidthPercent(ygNode, percentage.value)
-                    YGNodeStyleSetWidthPercent(ygNode, percentage.value)
-                case .auto:
-                    YGNodeStyleSetMinWidth(ygNode, YGUndefined)
-                    YGNodeStyleSetWidthAuto(ygNode)
-            }
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.width = newValue
         }
     }
 
     override public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetMinWidth(ygNode, YGUndefined)
-            YGNodeStyleSetWidth(ygNode, YGUndefined)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.width = .undefined
         }
     }
 

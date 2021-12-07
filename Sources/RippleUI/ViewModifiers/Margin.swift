@@ -21,12 +21,12 @@ import Yoga
 
 /// Sets the margin of a view.
 public struct MarginModifier: ViewModifier {
-    @Rippling var top: Float
-    @Rippling var right: Float
-    @Rippling var bottom: Float
-    @Rippling var left: Float
+    @Rippling var top: Dimension
+    @Rippling var right: Dimension
+    @Rippling var bottom: Dimension
+    @Rippling var left: Dimension
 
-    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+    public init(top: Rippling<Dimension>, right: Rippling<Dimension>, bottom: Rippling<Dimension>, left: Rippling<Dimension>) {
         self._top = top
         self._right = right
         self._bottom = bottom
@@ -40,17 +40,17 @@ public struct MarginModifier: ViewModifier {
 
 public extension View {
     /// Sets the margin of the view for all 4 edges.
-    func margin(_ margin: @autoclosure @escaping Ripplet<DIP>) -> some View {
-        let rippling = Rippling<DIP>(margin())
+    func margin(_ margin: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+        let rippling = Rippling<Dimension>(margin())
         return modifier(MarginModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
     }
 
     /// Sets the margin of the view for specified edges.
     func margin(
-        top: @autoclosure @escaping Ripplet<DIP> = 0,
-        right: @autoclosure @escaping Ripplet<DIP> = 0,
-        bottom: @autoclosure @escaping Ripplet<DIP> = 0,
-        left: @autoclosure @escaping Ripplet<DIP> = 0
+        top: @autoclosure @escaping Ripplet<Dimension> = 0,
+        right: @autoclosure @escaping Ripplet<Dimension> = 0,
+        bottom: @autoclosure @escaping Ripplet<Dimension> = 0,
+        left: @autoclosure @escaping Ripplet<Dimension> = 0
     ) -> some View {
         return modifier(
             MarginModifier(
@@ -65,10 +65,10 @@ public extension View {
 
 /// Target for margin modifier.
 public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
-    @Rippling var top: DIP
-    @Rippling var right: DIP
-    @Rippling var bottom: DIP
-    @Rippling var left: DIP
+    @Rippling var top: Dimension
+    @Rippling var right: Dimension
+    @Rippling var bottom: Dimension
+    @Rippling var left: Dimension
 
     var topSub: AnyCancellable?
     var rightSub: AnyCancellable?
@@ -77,49 +77,49 @@ public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
 
     public var boundTarget: TargetNode?
 
-    public init(top: Rippling<DIP>, right: Rippling<DIP>, bottom: Rippling<DIP>, left: Rippling<DIP>) {
+    public init(top: Rippling<Dimension>, right: Rippling<Dimension>, bottom: Rippling<Dimension>, left: Rippling<Dimension>) {
         self._top = top
         self._right = right
         self._bottom = bottom
         self._left = left
 
         self.topSub = top.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetMargin(ygNode, YGEdgeTop, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.marginTop = newValue
             }
         }
         self.rightSub = right.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetMargin(ygNode, YGEdgeRight, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.marginRight = newValue
             }
         }
         self.bottomSub = bottom.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetMargin(ygNode, YGEdgeBottom, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.marginBottom = newValue
             }
         }
         self.leftSub = left.observe { newValue in
-            if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-                YGNodeStyleSetMargin(ygNode, YGEdgeLeft, newValue)
+            if var layoutTarget = self.boundTarget as? LayoutTarget {
+                layoutTarget.marginLeft = newValue
             }
         }
     }
 
     public func apply() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetMargin(ygNode, YGEdgeTop, self.top)
-            YGNodeStyleSetMargin(ygNode, YGEdgeRight, self.right)
-            YGNodeStyleSetMargin(ygNode, YGEdgeBottom, self.bottom)
-            YGNodeStyleSetMargin(ygNode, YGEdgeLeft, self.left)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.marginTop = self.top
+            layoutTarget.marginRight = self.right
+            layoutTarget.marginBottom = self.bottom
+            layoutTarget.marginLeft = self.left
         }
     }
 
     public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetMargin(ygNode, YGEdgeTop, 0)
-            YGNodeStyleSetMargin(ygNode, YGEdgeRight, 0)
-            YGNodeStyleSetMargin(ygNode, YGEdgeBottom, 0)
-            YGNodeStyleSetMargin(ygNode, YGEdgeLeft, 0)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.marginTop = .undefined
+            layoutTarget.marginRight = .undefined
+            layoutTarget.marginBottom = .undefined
+            layoutTarget.marginLeft = .undefined
         }
     }
 

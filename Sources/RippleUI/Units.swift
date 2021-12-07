@@ -21,6 +21,11 @@ import Yoga
 public struct Percentage: Equatable {
     public let value: Float
 
+    /// Creates a new percentage value from given float.
+    init(_ value: Float) {
+        self.value = value
+    }
+
     public static func == (lhs: Percentage, rhs: Percentage) -> Bool {
         return lhs.value == rhs.value
     }
@@ -31,11 +36,15 @@ postfix operator %
 public extension Float {
     /// Creates a percentage `Dimension` from a float literal.
     static postfix func % (value: Float) -> Dimension {
-        return .percentage(Percentage(value: value))
+        return .percentage(Percentage(value))
     }
 }
 
 public typealias DIP = Float
+
+public extension DIP {
+    static let undefined: DIP = YGUndefined
+}
 
 /// A dimension which unit can vary.
 public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
@@ -61,6 +70,24 @@ public enum Dimension: CustomStringConvertible, ExpressibleByFloatLiteral, Expre
                 return "\(value)%"
             case .auto:
                 return "auto"
+        }
+    }
+}
+
+public extension YGValue {
+    /// Corresponding Ripple dimension.
+    var dimension: Dimension {
+        switch self.unit {
+            case YGUnitUndefined:
+                return .undefined
+            case YGUnitPoint:
+                return .dip(self.value)
+            case YGUnitPercent:
+                return .percentage(Percentage(self.value))
+            case YGUnitAuto:
+                return .auto
+            default:
+                fatalError("Unknown YGValue \(self)")
         }
     }
 }

@@ -40,8 +40,8 @@ public extension Node {
 /// Target for axis view modifier.
 public class AxisTarget: ObservingViewModifierTarget<Axis>, CustomStringConvertible {
     override public func onValueChange(newValue: Axis) {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexDirection(ygNode, newValue.yogaFlexDirection)
+        if var layout = self.boundTarget as? LayoutTarget {
+            layout.axis = newValue
         }
     }
 
@@ -79,7 +79,7 @@ public extension YGFlexDirection {
             case YGFlexDirectionRow:
                 return .row
             default:
-                fatalError("Unsupported YGFlexDirection \(self)")
+                fatalError("Unknown YGFlexDirection \(self)")
         }
     }
 }

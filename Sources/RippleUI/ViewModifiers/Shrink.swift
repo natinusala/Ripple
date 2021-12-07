@@ -40,14 +40,14 @@ public extension View {
 /// Target for shrink modifier.
 public class ShrinkTarget: ObservingViewModifierTarget<Float>, CustomStringConvertible {
     override public func onValueChange(newValue: Float) {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexShrink(ygNode, newValue)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.shrink = newValue
         }
     }
 
     override public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexShrink(ygNode, YGUndefined)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.shrink = .undefined
         }
     }
 

@@ -45,6 +45,6 @@ public struct Node<Content>: View where Content: View {
 /// Target for a node.
 public class NodeTarget: ViewTarget, CustomStringConvertible {
     public var description: String {
-        return "NodeTarget (axis: \(YGNodeStyleGetFlexDirection(self.ygNode).axis))"
+        return "NodeTarget (axis: \(self.axis))"
     }
 }

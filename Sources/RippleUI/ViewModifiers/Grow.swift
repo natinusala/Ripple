@@ -41,14 +41,14 @@ public extension View {
 /// Target for grow modifier.
 public class GrowTarget: ObservingViewModifierTarget<Float>, CustomStringConvertible {
     override public func onValueChange(newValue: Float) {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexGrow(ygNode, newValue)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.grow = newValue
         }
     }
 
     override public func reset() {
-        if let ygNode = (self.boundTarget as? ViewTarget)?.ygNode {
-            YGNodeStyleSetFlexGrow(ygNode, YGUndefined)
+        if var layoutTarget = self.boundTarget as? LayoutTarget {
+            layoutTarget.grow = .undefined
         }
     }
 

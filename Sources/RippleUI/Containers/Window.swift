@@ -83,6 +83,15 @@ public class WindowTarget: ContainerTarget, FrameTarget {
             getContext().exit()
         }
 
+        // Draw every view
+        for view in self.children {
+            if let drawableTarget = view as? DrawableTarget {
+                drawableTarget.frame(canvas: self.handle.canvas)
+            } else if let frameTarget = view as? FrameTarget {
+                frameTarget.frame()
+            }
+        }
+
         // Swap buffers
         self.handle.swapBuffers()
     }
