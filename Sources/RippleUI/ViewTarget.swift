@@ -106,8 +106,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
     }
 
     open func draw(canvas: Canvas) {
-        let paint = Paint(color: .blue)
-        canvas.drawRect(self.layout, paint: paint)
+        // Draw the background
+        self.background.draw(canvas: canvas)
     }
 
     var axis: Axis {

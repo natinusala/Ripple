@@ -77,6 +77,16 @@ public class WindowTarget: ContainerTarget, FrameTarget {
         }
     }
 
+    override public func insert(child: inout TargetNode, at position: UInt?) {
+        super.insert(child: &child, at: position)
+
+        // Resize the child view
+        if var child = self.children[0] as? LayoutTarget {
+            child.width = .dip(self.handle.width)
+            child.height = .dip(self.handle.height)
+        }
+    }
+
     func frame() {
         // Handle window "X" button
         if self.handle.shouldClose {
