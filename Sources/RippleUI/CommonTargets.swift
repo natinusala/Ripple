@@ -72,3 +72,7 @@ protocol LayoutTarget {
     var paddingLeft: Dimension { get set }
 }
 
+/// Target protocol for anything that has a background.
+protocol BackgroundTarget {
+    var background: Shape { get set }
+}

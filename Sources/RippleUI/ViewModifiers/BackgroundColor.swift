@@ -39,11 +39,15 @@ extension View {
 /// Target for background color modifier.
 public class BackgroundColorTarget: ObservingViewModifierTarget<Color>, CustomStringConvertible {
     override public func onValueChange(newValue: Color) {
-        // TODO: implement
+        if var backgroundTarget = self.boundTarget as? BackgroundTarget {
+            backgroundTarget.background.background = Paint(color: newValue)
+        }
     }
 
     override public func reset() {
-        // TODO: implement
+        if var backgroundTarget = self.boundTarget as? BackgroundTarget {
+            backgroundTarget.background.background = nil
+        }
     }
 
     public var description: String {

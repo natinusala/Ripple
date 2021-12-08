@@ -19,13 +19,15 @@ import RippleCore
 import Yoga
 
 /// Target of a view.
-public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
+public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundTarget {
     public let type: TargetType = .view
 
     public var children: [TargetNode] = []
     public var parent: TargetNode?
 
     private let ygNode: YGNodeRef
+
+    var background = Shape()
 
     public private(set) var layout = Rect(
         x: 0,
@@ -86,7 +88,7 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
         }
     }
 
-    open func frame(canvas: Canvas) {
+    func frame(canvas: Canvas) {
         // Call layout if needed
         if YGNodeIsDirty(self.ygNode) {
             self.calculateLayout()
@@ -107,7 +109,7 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget {
 
     open func draw(canvas: Canvas) {
         // Draw the background
-        self.background.draw(canvas: canvas)
+        self.background.draw(canvas: canvas, in: self.layout)
     }
 
     var axis: Axis {

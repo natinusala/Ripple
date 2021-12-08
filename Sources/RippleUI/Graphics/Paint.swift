@@ -59,6 +59,16 @@ public class Paint {
         self.setColor(color)
     }
 
+    /// Attempts to create a paint with given optional color.
+    /// Will return `nil` if the color is `nil`.
+    public convenience init?(color: Color?) {
+        if let color = color {
+            self.init(color: color)
+        }
+
+        return nil
+    }
+
     /// Sets the paint color.
     public func setColor(_ color: Color) {
         sk_paint_set_color(self.handle, color.value)
