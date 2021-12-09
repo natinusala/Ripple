@@ -16,6 +16,8 @@
 
 import Ripple
 
+import Async
+
 struct Separator: View {
     var body: some View {
         Rectangle(color: .white)

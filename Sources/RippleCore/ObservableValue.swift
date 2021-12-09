@@ -68,6 +68,8 @@ extension ObservableValue {
     /// The subscription must be stored, otherwise it will immediately
     /// be cancelled.
     public func observe(closure: @escaping (Value) -> ()) -> AnyCancellable {
+        // This method is for "final" observations, and users should be fine with waiting 16.66ms
+        // before triggering the closure. This is why we can keep `.receive(on: DispatchQueue.main)`.
         self.subject
             .receive(on: DispatchQueue.main)
             .sink {
@@ -106,8 +108,12 @@ extension ObservableValue {
 
         for subject in entry.subjects {
             self.subscriptions.append(
+                // Do not receive on main queue for performance reasons: `drainMainQueue()` does not run closures
+                // that have been added to the queue from inside another closure. Instead, it waits for the next `drainMainQueue()` call.
+                // This is possibly to prevent hogging the main thread for too long, which is what we want.
+                // As a result, if we have an observable value that ripples down 10 levels, it will take 166.66ms
+                // for it to reach the last level which is above the 100ms latency limit for UI responsiveness.
                 subject
-                    .receive(on: DispatchQueue.main)
                     .sink { _ in
                         // Only trigger one refresh at a time, this is in case an observable
                         // depends on the same observable as another of its dependency
