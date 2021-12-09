@@ -113,6 +113,7 @@ extension ObservableValue {
                 // This is possibly to prevent hogging the main thread for too long, which is what we want.
                 // As a result, if we have an observable value that ripples down 10 levels, it will take 166.66ms
                 // for it to reach the last level which is above the 100ms latency limit for UI responsiveness.
+                // TODO: do we need our own scheduler that dispatches the work load across multiple frames (possibly under 100ms)?
                 subject
                     .sink { _ in
                         // Only trigger one refresh at a time, this is in case an observable
