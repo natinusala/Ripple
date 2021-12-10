@@ -27,7 +27,8 @@ let debugSkia = false
 let package = Package(
     name: "Ripple",
     products: [
-        .executable(name: "RippleDemo", targets: ["RippleDemo"])
+        .executable(name: "RippleDemo", targets: ["RippleDemo"]),
+        .library(name: "Ripple", targets: ["Ripple"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swift-server/swift-backtrace.git", .upToNextMajor(from: "1.3.1")),
