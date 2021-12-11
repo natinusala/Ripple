@@ -61,6 +61,22 @@ public extension View {
             )
         )
     }
+
+    /// Sets the margin of the view for specified edges:
+    /// left / right (`sides`) and top / bottom (`???`).
+    func margin(
+        horizontal: @autoclosure @escaping Ripplet<Dimension> = 0,
+        vertical: @autoclosure @escaping Ripplet<Dimension> = 0
+    ) -> some View {
+        return modifier(
+            MarginModifier(
+                top: .init(vertical()),
+                right: .init(horizontal()),
+                bottom: .init(vertical()),
+                left: .init(horizontal())
+            )
+        )
+    }
 }
 
 /// Target for margin modifier.

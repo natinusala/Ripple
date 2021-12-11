@@ -54,8 +54,6 @@ class GLFWWindow: NativeWindow {
     let canvas: Canvas
 
     init(title: String, mode: WindowMode, graphicsApi: GraphicsAPI) throws {
-        let graphicsApi = try graphicsApi == .auto ? GraphicsAPI.getDefault() : graphicsApi
-
         // Setup hints
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
@@ -141,8 +139,6 @@ class GLFWWindow: NativeWindow {
                         nil
                     )
                 }
-            case .auto:
-                fatalError()
         }
 
         // Enable sRGB if requested
@@ -150,8 +146,6 @@ class GLFWWindow: NativeWindow {
             switch graphicsApi {
                 case .gl:
                     glEnable(UInt32(GL_FRAMEBUFFER_SRGB))
-                case .auto:
-                    fatalError()
             }
         }
 
@@ -183,8 +177,6 @@ class GLFWWindow: NativeWindow {
                     0,
                     &framebufferInfo
                 )
-            case .auto:
-                fatalError()
         }
 
         guard let context = context else {
@@ -223,8 +215,6 @@ class GLFWWindow: NativeWindow {
 
                 Logger.info("   - Version: \(majorVersion).\(minorVersion)")
                 Logger.info("   - GLSL version: \(String(cString: glGetString(GLenum(GL_SHADING_LANGUAGE_VERSION))!))")
-            case .auto:
-                fatalError()
         }
 
         // Finalize init

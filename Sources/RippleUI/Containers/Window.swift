@@ -29,7 +29,7 @@ public struct Window<Content>: Container where Content: View {
     public init(
         title: @escaping @autoclosure Ripplet<String>,
         mode: @escaping @autoclosure Ripplet<WindowMode> = .windowed(1280, 720),
-        graphicsApi: @escaping @autoclosure Ripplet<GraphicsAPI> = .auto,
+        graphicsApi: @escaping @autoclosure Ripplet<GraphicsAPI> = GraphicsAPI.getDefault(),
         content: () -> Content
     ) {
         self._title = .init(title())
