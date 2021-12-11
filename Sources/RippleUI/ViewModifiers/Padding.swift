@@ -61,6 +61,22 @@ public extension View {
             )
         )
     }
+
+    /// Sets the padding of the view for both horizontal edges (left / right)
+    /// and vertical edges (top / bottom).
+    func padding(
+        horizontal: @autoclosure @escaping Ripplet<Dimension> = 0,
+        vertical: @autoclosure @escaping Ripplet<Dimension> = 0
+    ) -> some View {
+        return modifier(
+            PaddingModifier(
+                top: .init(vertical()),
+                right: .init(horizontal()),
+                bottom: .init(vertical()),
+                left: .init(horizontal())
+            )
+        )
+    }
 }
 
 /// Target for padding modifier.
