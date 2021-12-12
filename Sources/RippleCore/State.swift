@@ -26,6 +26,7 @@ public class State<Value>: ObservableValue {
     public var subscriptions: [AnyCancellable] = []
     public var pendingRefresh = false
 
+    /// Contains the actual state value.
     public var cachedValue: Value? {
         didSet {
             self.subject.send()
@@ -33,12 +34,8 @@ public class State<Value>: ObservableValue {
     }
 
     public var wrappedValue: Value {
-        get {
-            return self.value
-        }
-        set {
-            self.cachedValue = newValue
-        }
+        get { return self.value } // Use self.value for observable value access recording
+        set { self.cachedValue = newValue }
     }
 
     /// Creates a new state variable with the given initial value.

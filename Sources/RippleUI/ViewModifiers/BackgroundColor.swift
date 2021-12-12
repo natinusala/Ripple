@@ -29,7 +29,7 @@ public struct BackgroundColorModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     /// Changes the background color of the view.
     func backgroundColor(_ color: @autoclosure @escaping Ripplet<Color>) -> some View {
         return modifier(BackgroundColorModifier(color: .init(color())))

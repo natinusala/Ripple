@@ -18,10 +18,7 @@
 // library at compile time. Please set them all to `false` before commiting.
 
 /// Enables core logs (engine, mounting / unmounting, view updates...).
-let debugCore = true
+let debugCore = false
 
 /// Enables target logs.
-let debugTarget = true
-
-/// Enables logs for graphics API (OpenGL, Vulkan...)
-let debugGraphicsAPI = false
+let debugTarget = false

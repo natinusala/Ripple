@@ -42,8 +42,13 @@ public struct Color: CustomStringConvertible, Equatable {
     }
 
     /// Creates a color with given ARGB UInt32 value.
-    public init(_ value: UInt32) {
+    public init(argb value: UInt32) {
         self.value = value
+    }
+
+    /// Creates a color with given RGB UInt32 value. Alpha will be set to 255 (fully opaque).
+    public init(rgb value: UInt32) {
+        self.init(argb: value | 0xFF000000)
     }
 
     public var description: String {
