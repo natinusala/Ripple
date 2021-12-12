@@ -64,9 +64,11 @@ var observableRecordingStack: [ObservableRecordingEntry] = []
 
 extension ObservableValue {
     /// Runs the given closure when the observed value changes.
+    ///
     /// Returns a Combine subscription that can be cancelled anytime using `cancel()`.
+    ///
     /// The subscription must be stored, otherwise it will immediately
-    /// be cancelled.
+    /// be cancelled, even if a closure has already been put into the queue before cancellation.
     public func observe(closure: @escaping (Value) -> ()) -> AnyCancellable {
         // This method is for "final" observations, and users should be fine with waiting 16.66ms
         // before triggering the closure. This is why we can keep `.receive(on: DispatchQueue.main)`.
