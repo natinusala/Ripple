@@ -111,6 +111,9 @@ public class Environment<Value>: ObservableValue {
     /// The key path to be used to find the environment value.
     let keyPath: ValueKeyPath
 
+    /// The Combine subject for the underlying environment value.
+    /// The subject for any given environment value is immutable throughout the whole app lifetime,
+    /// so it can be lazyly set and stored to reduce the amount of costly `subjectOf(keyPath:)` calls.
     public lazy var subject: ObservableSubject = getEnvironment().subjectOf(keyPath: self.keyPath)
 
     public var subscriptions: [AnyCancellable] = []
@@ -119,7 +122,7 @@ public class Environment<Value>: ObservableValue {
     /// Read-only proxy to the stored value.
     public var cachedValue: Value? {
         get { return getEnvironment()[keyPath: self.keyPath] }
-        set { /* Do nothing, environment values are immutable from this wrapper */ }
+        set { /* Do nothing, environment values are immutable when used from this wrapper */ }
     }
 
     /// Creates a new environment value binding from a key path.
