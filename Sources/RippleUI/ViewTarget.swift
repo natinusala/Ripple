@@ -19,7 +19,7 @@ import RippleCore
 import Yoga
 
 /// Target of a view.
-public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundTarget {
+public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundShapeTarget {
     public let type: TargetType = .view
 
     public var children: [TargetNode] = []

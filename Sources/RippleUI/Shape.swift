@@ -14,15 +14,45 @@
     limitations under the License.
 */
 
-/// A shape.
-struct Shape {
+/// The background of a shape.
+public struct Background {
     /// Background paint.
-    var background: Paint?
+    var paint: Paint?
+
+    /// Draws the background in the given rectangle.
+    func draw(canvas: Canvas, in layout: Rect) {
+        if let paint = self.paint {
+            canvas.drawRect(layout, paint: paint)
+        }
+    }
+
+    /// Creates a new background with the given solid color.
+    public static func color(_ color: Color) -> Background {
+        return Background(paint: Paint(color: color))
+    }
+
+    /// Creates a new background with the given radial gradient.
+    public static func radialGradient(
+        center: (Dimension, Dimension),
+        radius: Dimension,
+        colors: [(Color, Dimension)]
+    ) -> Background {
+        fatalError()
+        // return Background(
+        //     paint: Paint(shader: .radialGradient(
+        //         center: center, radius: radius, colors: colors
+        //     ))
+        // )
+    }
+}
+
+/// A shape.
+public struct Shape {
+    /// Background.
+    var background: Background?
 
     /// Draws the shape in the given rectangle.
     func draw(canvas: Canvas, in layout: Rect) {
-        if let background = self.background {
-            canvas.drawRect(layout, paint: background)
-        }
+        self.background?.draw(canvas: canvas, in: layout)
     }
 }

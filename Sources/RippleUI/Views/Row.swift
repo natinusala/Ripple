@@ -27,7 +27,7 @@ public struct Row<Content>: View where Content: View {
 
     public var body: some View {
         Node {
-            self.content
+            content
         }
             .axis(.row)
     }

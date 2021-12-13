@@ -28,7 +28,7 @@ public struct Node<Content>: View where Content: View {
     }
 
     public var body: some View {
-        self.content
+        content
     }
 
     public static func makeOutput(of view: Node<Content>) -> [Output] {

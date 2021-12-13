@@ -73,6 +73,6 @@ protocol LayoutTarget {
 }
 
 /// Target protocol for anything that has a background.
-protocol BackgroundTarget {
+protocol BackgroundShapeTarget {
     var background: Shape { get set }
 }

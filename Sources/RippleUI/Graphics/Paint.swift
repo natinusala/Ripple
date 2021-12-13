@@ -54,9 +54,17 @@ public class Paint {
     }
 
     /// Creates a paint with given color.
-    public init(color: Color) {
-        self.handle = sk_paint_new()
+    public convenience init(color: Color) {
+        self.init()
+
         self.setColor(color)
+    }
+
+    /// Creates a paint with given shader.
+    public convenience init(shader: Shader) {
+        self.init()
+
+        self.setShader(shader)
     }
 
     /// Attempts to create a paint with given optional color.
@@ -72,6 +80,11 @@ public class Paint {
     /// Sets the paint color.
     public func setColor(_ color: Color) {
         sk_paint_set_color(self.handle, color.value)
+    }
+
+    /// Sets the paint shader.
+    public func setShader(_ shader: Shader) {
+        sk_paint_set_shader(self.handle, shader.handle)
     }
 
     /// Sets the filtering quality.

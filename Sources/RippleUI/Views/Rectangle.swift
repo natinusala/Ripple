@@ -27,6 +27,6 @@ public struct Rectangle: View {
 
     public var body: some View {
         EmptyView()
-            .backgroundColor(self.color)
+            .background(.color(color))
     }
 }

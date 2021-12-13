@@ -23,5 +23,6 @@
 #include <skia_loftwing/include/c/sk_image.h>
 #include <skia_loftwing/include/c/sk_bitmap.h>
 #include <skia_loftwing/include/c/sk_pixmap.h>
+#include <skia_loftwing/include/c/sk_shader.h>
 
 static const uint32_t kAll_GrBackendState = 0xffffffff;
