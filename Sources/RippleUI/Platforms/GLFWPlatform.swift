@@ -14,6 +14,7 @@
     limitations under the License.
 */
 
+import OpenCombine
 import GLFW
 import Glad
 import Skia
@@ -46,12 +47,14 @@ class GLFWPlatform: Platform {
 class GLFWWindow: NativeWindow {
     let handle: OpaquePointer?
 
-    let width: Float
-    let height: Float
+    var width: Float
+    var height: Float
 
     let skContext: OpaquePointer
 
     let canvas: Canvas
+
+    let resizeSubject = PassthroughSubject<(width: Float, height: Float), Never>()
 
     init(title: String, mode: WindowMode, graphicsApi: GraphicsAPI) throws {
         // Setup hints
@@ -225,6 +228,18 @@ class GLFWWindow: NativeWindow {
         }
 
         self.canvas = SkiaCanvas(handle: nativeCanvas)
+
+        // Set the `GLFWWindow` pointer as GLFW window userdata
+        let unretainedSelf = Unmanaged.passUnretained(self)
+        glfwSetWindowUserPointer(self.handle, unretainedSelf.toOpaque())
+
+        // Setup resize callback
+        glfwSetWindowSizeCallback(self.handle) { window, width, height in
+            guard let window = window else {
+                fatalError("GLFW window size callback called with `nil`")
+            }
+            onWindowResized(window: window, width: width, height: height)
+        }
     }
 
     var shouldClose: Bool {
@@ -234,6 +249,13 @@ class GLFWWindow: NativeWindow {
     func swapBuffers() {
         gr_direct_context_flush(self.skContext)
         glfwSwapBuffers(self.handle)
+    }
+
+    /// Called whenever this window is resized.
+    func onResized(width: Float, height: Float) {
+        self.width = width
+        self.height = height
+        self.resizeSubject.send((width: width, height: height))
     }
 }
 
@@ -249,6 +271,14 @@ enum SkiaError: Error {
     case cannotInitSkiaTarget
     case cannotInitSkiaContext
     case cannotInitSkiaCanvas
+}
+
+/// Called when any GLFW window is resized. `GLFWWindow` reference can be retrieved
+/// from the window user pointer.
+private func onWindowResized(window: OpaquePointer, width: Int32, height: Int32) {
+    let unmanagedWindow = Unmanaged<GLFWWindow>.fromOpaque(UnsafeRawPointer(glfwGetWindowUserPointer(window)))
+    let glfwWindow = unmanagedWindow.takeUnretainedValue()
+    glfwWindow.onResized(width: Float(width), height: Float(height))
 }
 
 private func onGlDebugMessage(severity: GLenum, type: GLenum, id: GLuint, message: UnsafePointer<CChar>?) {

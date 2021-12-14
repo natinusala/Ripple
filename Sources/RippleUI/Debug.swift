@@ -19,3 +19,6 @@
 
 /// Enables logs for graphics API (OpenGL, Vulkan...)
 let debugGraphicsAPI = false
+
+/// Enables logs for layout engine.
+let debugLayout = false

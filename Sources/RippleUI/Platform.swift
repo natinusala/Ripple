@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import OpenCombine
+
 /// Enable sRGB color space?
 /// TODO: make it user-customizable should anyone care about sRGB
 let enableSRGB = false
@@ -59,10 +61,21 @@ public enum GraphicsAPI {
 
 /// Represents a native, platform-dependent window.
 protocol NativeWindow {
+    /// Should return true if the platform requested the window to close.
     var shouldClose: Bool { get }
+
+    /// Window width.
     var width: Float { get }
+
+    /// Window height.
     var height: Float { get }
+
+    /// Graphics canvas for this window.
     var canvas: Canvas { get }
 
+    /// Swap graphic buffers ("flush" the canvas).
     func swapBuffers()
+
+    /// Combine subject fired when the window dimensions change.
+    var resizeSubject: PassthroughSubject<(width: Float, height: Float), Never> { get }
 }

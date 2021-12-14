@@ -17,7 +17,7 @@
 import Skia
 
 /// A rectangle.
-public struct Rect: Equatable {
+public struct Rect: Equatable, CustomStringConvertible {
     public var x: Float {
         didSet {
             self.updateSkRect()
@@ -52,6 +52,11 @@ public struct Rect: Equatable {
 
     mutating func updateSkRect() {
         self.skRect = sk_rect_t(left: x, top: y, right: x + width, bottom: y + height)
+    }
+
+    public var description: String {
+        // Redefine description to exclude skRect
+        return "Rect(x: \(self.x), y: \(self.y), width: \(self.width), height: \(self.height))"
     }
 }
 

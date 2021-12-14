@@ -98,11 +98,8 @@ public protocol EnvironmentKey {
 
 /// Read-only binding to an environment value, identified by its key path in `EnvironmentValues`.
 ///
-/// To write an environment value, get the environment store using `getEnvironment()` then set the
-/// property directly in there.
-///
-/// XXX: Making the binding writable requires a fix in Swift, which does not currently support writing to
-/// key paths of a generic type (`Value` here).
+/// To write to an environment value, get the environment store using `getEnvironment()` then
+/// explicitely set the property directly in there.
 @propertyWrapper
 public class Environment<Value>: ObservableValue {
     /// Type of key path associated to this environment value.

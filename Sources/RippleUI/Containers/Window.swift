@@ -15,7 +15,10 @@
 */
 
 import Foundation
+import Dispatch
 
+import OpenCombine
+import OpenCombineDispatch
 import RippleCore
 
 /// A desktop window.
@@ -59,6 +62,7 @@ public class WindowTarget: ContainerTarget, FrameTarget {
     @Rippling var graphicsApi: GraphicsAPI
 
     let handle: NativeWindow
+    var windowResizeSubscription: AnyCancellable?
 
     init(title: Rippling<String>, mode: Rippling<WindowMode>, graphicsApi: Rippling<GraphicsAPI>) {
         self._title = title
@@ -75,12 +79,24 @@ public class WindowTarget: ContainerTarget, FrameTarget {
             Logger.error("Cannot create window: \(error.qualifiedName)")
             exit(-1)
         }
+
+        super.init()
+
+        // Subscribe to the native window resize event
+        self.windowResizeSubscription = self.handle.resizeSubject
+            .receive(on: DispatchQueue.main)
+            .sink { _, _ in
+                self.onResized()
+            }
     }
 
     override public func insert(child: inout TargetNode, at position: UInt?) {
         super.insert(child: &child, at: position)
+        self.resizeChildView()
+    }
 
-        // Resize the child view
+    /// Resizes the child view to fill the whole window.
+    func resizeChildView() {
         if var child = self.children[0] as? LayoutTarget {
             child.width = .dip(self.handle.width)
             child.height = .dip(self.handle.height)
@@ -104,5 +120,12 @@ public class WindowTarget: ContainerTarget, FrameTarget {
 
         // Swap buffers
         self.handle.swapBuffers()
+    }
+
+    /// Called anytime the native window is resized.
+    func onResized() {
+        Logger.info("Window resized to \(self.handle.width)x\(self.handle.height)")
+
+        self.resizeChildView()
     }
 }

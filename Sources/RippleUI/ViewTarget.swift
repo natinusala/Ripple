@@ -67,6 +67,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
             height: YGNodeLayoutGetHeight(self.ygNode)
         )
 
+        Logger.debug(debugLayout, "New layout of \(self): \(self.layout)")
+
         for child in self.children {
             if let child = child as? ViewTarget {
                 child.updateLayout(parentX: self.layout.x, parentY: self.layout.y)
@@ -80,6 +82,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
         if let parent = self.parent as? ViewTarget {
             parent.calculateLayout()
         } else {
+            Logger.debug(debugLayout, "Calling `YGNodeCalculateLayout` on \(self)")
+
             // Use Yoga to calculate layout
             YGNodeCalculateLayout(self.ygNode, YGUndefined, YGUndefined, YGDirectionLTR)
 
@@ -91,6 +95,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
     func frame(canvas: Canvas) {
         // Call layout if needed
         if YGNodeIsDirty(self.ygNode) {
+            Logger.debug(debugLayout, "\(self) is dirty, calculating layout")
+
             self.calculateLayout()
         }
 
