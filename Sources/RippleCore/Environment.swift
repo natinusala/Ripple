@@ -16,8 +16,8 @@
 
 import OpenCombine
 
-/// Storage for one environment value.
-class EnvironmentValueStorage {
+/// Storage for one environment variable.
+class EnvironmentVariableStorage {
     /// The value.
     var value: Any {
         didSet {
@@ -28,23 +28,23 @@ class EnvironmentValueStorage {
     /// Combine subject fired when the value changes.
     let subject = ObservableSubject()
 
-    /// Creates a new environment value storage with an initial value.
+    /// Creates a new environment variable storage with an initial value.
     init(value: Any) {
         self.value = value
     }
 }
 
-/// Storage for environment values.
-public class EnvironmentValues {
-    /// All environment values.
-    var values: [ObjectIdentifier: EnvironmentValueStorage] = [:]
+/// Storage for environment variables.
+public class EnvironmentVariables {
+    /// All environment variables.
+    var values: [ObjectIdentifier: EnvironmentVariableStorage] = [:]
 
     /// The last accessed key, used to get the subject from a key path.
     var lastAccessedKey: ObjectIdentifier?
 
-    /// Gets or create an environment value storage of the given
+    /// Gets or create an environment variable storage of the given
     /// identifier.
-    func getOrCreateStorage<K>(of key: K.Type) -> EnvironmentValueStorage where K: EnvironmentKey {
+    func getOrCreateStorage<K>(of key: K.Type) -> EnvironmentVariableStorage where K: EnvironmentKey {
         self.lastAccessedKey = ObjectIdentifier(key)
 
         // If the storage already exists, just return it
@@ -53,19 +53,19 @@ public class EnvironmentValues {
         }
 
         // Otherwise create it with default value
-        let storage = EnvironmentValueStorage(value: key.defaultValue)
+        let storage = EnvironmentVariableStorage(value: key.defaultValue)
         self.values[ObjectIdentifier(key)] = storage
         return storage
     }
 
-    /// Returns an environment value by key.
+    /// Get and set an environment variable by key.
     public subscript<K>(key: K.Type) -> K.Value where K: EnvironmentKey {
         get { return self.getOrCreateStorage(of: key).value as! K.Value }
         set { self.getOrCreateStorage(of: key).value = newValue }
     }
 
-    /// Returns the Combine subject of an environment value by key path.
-    func subjectOf<Value>(keyPath: KeyPath<EnvironmentValues, Value>) -> ObservableSubject {
+    /// Returns the Combine subject of an environment variable by key path.
+    func subjectOf<Value>(keyPath: KeyPath<EnvironmentVariables, Value>) -> ObservableSubject {
         /// XXX: This whole method is a bit of a hack
 
         self.lastAccessedKey = nil
@@ -79,15 +79,15 @@ public class EnvironmentValues {
     }
 }
 
-/// Shared environment values for the whole app.
-fileprivate var environmentValues = EnvironmentValues()
+/// Shared environment variables for the whole app.
+fileprivate var environmentVariables = EnvironmentVariables()
 
-/// Returns shared environment values.
-public func getEnvironment() -> EnvironmentValues {
-    return environmentValues
+/// Returns shared environment variables.
+public func getEnvironment() -> EnvironmentVariables {
+    return environmentVariables
 }
 
-/// An environment value key.
+/// An environment variable key.
 public protocol EnvironmentKey {
     /// The type of the value for this key.
     associatedtype Value
@@ -96,20 +96,20 @@ public protocol EnvironmentKey {
     static var defaultValue: Value { get }
 }
 
-/// Read-only binding to an environment value, identified by its key path in `EnvironmentValues`.
+/// Read-only binding to an environment variable, identified by its key path in `EnvironmentVariables`.
 ///
-/// To write to an environment value, get the environment store using `getEnvironment()` then
+/// To write to an environment variable, get the environment store using `getEnvironment()` then
 /// explicitely set the property directly in there.
 @propertyWrapper
 public class Environment<Value>: Observable {
-    /// Type of key path associated to this environment value.
-    public typealias ValueKeyPath = KeyPath<EnvironmentValues, Value>
+    /// Type of key path associated to this environment variable.
+    public typealias ValueKeyPath = KeyPath<EnvironmentVariables, Value>
 
-    /// The key path to be used to find the environment value.
+    /// The key path to be used to find the environment variable.
     let keyPath: ValueKeyPath
 
-    /// The Combine subject for the underlying environment value.
-    /// The subject for any given environment value is immutable throughout the whole app lifetime,
+    /// The Combine subject for the underlying environment variable.
+    /// The subject for any given environment variable is immutable throughout the whole app lifetime,
     /// so it can be lazyly set and stored to reduce the amount of costly `subjectOf(keyPath:)` calls.
     public lazy var subject: ObservableSubject = getEnvironment().subjectOf(keyPath: self.keyPath)
 
@@ -119,10 +119,10 @@ public class Environment<Value>: Observable {
     /// Read-only proxy to the stored value.
     public var cachedValue: Value? {
         get { return getEnvironment()[keyPath: self.keyPath] }
-        set { /* Do nothing, environment values are immutable when used from this wrapper */ }
+        set { /* Do nothing, environment variables are immutable when used from this wrapper */ }
     }
 
-    /// Creates a new environment value binding from a key path.
+    /// Creates a new environment variable binding from its key path in `EnvironmentVariables`.
     public init(_ keyPath: ValueKeyPath) {
         self.keyPath = keyPath
     }
