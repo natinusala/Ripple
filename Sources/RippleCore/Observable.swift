@@ -23,9 +23,12 @@ import OpenCombineDispatch
 public typealias ObservableSubject = PassthroughSubject<Void, Never>
 extension ObservableSubject: Hashable, Equatable {} // Uses default implementations defined in Extensions.swift
 
-/// A value that can be observated for changes.
-public protocol ObservableValue: AnyObject {
-    /// Type of the obervable value.
+/// A value that can be observed for changes.
+///
+/// If used directly, always use the `value` property to make sure
+/// to trigger the caching and rippling mechanisms.
+public protocol Observable: AnyObject {
+    /// Type of the observed value.
     associatedtype Value
 
     /// The cached value, aka the last known value returned by `evaluate()`.
@@ -37,9 +40,8 @@ public protocol ObservableValue: AnyObject {
     /// this event is fired.
     var subject: ObservableSubject { get }
 
-    /// List of other observable values this observable value depends on.
-    /// This observable value will be refreshed if any of those dependent values
-    /// change.
+    /// List of other observables this observable depends on, in the form of Combine subscriptions.
+    /// This observable will be refreshed if any of those dependent values change.
     var subscriptions: [AnyCancellable] { get set }
 
     /// Is there already a refresh call pending in a dispatch queue?
@@ -62,8 +64,9 @@ class ObservableRecordingEntry {
 /// being evaluated.
 var observableRecordingStack: [ObservableRecordingEntry] = []
 
-extension ObservableValue {
-    /// Runs the given closure when the observed value changes.
+extension Observable {
+    /// Runs the given closure when the observed value changes. The closure will be executed
+    /// on the main event queue, so at least one frame after the value actually changes.
     ///
     /// Returns a Combine subscription that can be cancelled anytime using `cancel()`.
     ///
@@ -134,7 +137,6 @@ extension ObservableValue {
         // Update our cached value and fire our own subject to notify that
         // our value changed
         self.cachedValue = value
-
         self.subject.send()
 
         return value

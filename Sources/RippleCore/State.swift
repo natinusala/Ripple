@@ -21,7 +21,7 @@ import OpenCombine
 /// Any change to a state variable will trigger a re-evaluation of every
 /// binding that depends on this variable (and any binding that depends on those bindings...).
 @propertyWrapper
-public class State<Value>: ObservableValue {
+public class State<Value>: Observable {
     public let subject = ObservableSubject()
     public var subscriptions: [AnyCancellable] = []
     public var pendingRefresh = false

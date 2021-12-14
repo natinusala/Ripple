@@ -129,7 +129,7 @@ open class ObservingViewModifierTarget<Value>: ViewModifierTarget {
     var subscription: AnyCancellable?
 
     /// Creates a new target observing the given value.
-    public init<V: ObservableValue>(observing value: V) where V.Value == Value {
+    public init<V: Observable>(observing value: V) where V.Value == Value {
         self.observedValue = value.value
 
         self.subscription = value.observe { newValue in

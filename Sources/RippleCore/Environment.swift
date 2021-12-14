@@ -101,7 +101,7 @@ public protocol EnvironmentKey {
 /// To write to an environment value, get the environment store using `getEnvironment()` then
 /// explicitely set the property directly in there.
 @propertyWrapper
-public class Environment<Value>: ObservableValue {
+public class Environment<Value>: Observable {
     /// Type of key path associated to this environment value.
     public typealias ValueKeyPath = KeyPath<EnvironmentValues, Value>
 

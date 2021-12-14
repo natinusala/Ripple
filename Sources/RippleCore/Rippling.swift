@@ -38,7 +38,7 @@ public typealias Ripplet<Value> = () -> Value
 ///
 /// Additionnaly, the value itself can be accessed anytime since `Rippling` is a property wrapper.
 @propertyWrapper
-public class Rippling<Value>: ObservableValue {
+public class Rippling<Value>: Observable {
     public let subject = ObservableSubject()
     public var subscriptions: [AnyCancellable] = []
     public var pendingRefresh = false
