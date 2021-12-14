@@ -113,7 +113,7 @@ public class Environment<Value>: Observable {
     /// so it can be lazyly set and stored to reduce the amount of costly `subjectOf(keyPath:)` calls.
     public lazy var subject: ObservableSubject = getEnvironment().subjectOf(keyPath: self.keyPath)
 
-    public var subscriptions: [AnyCancellable] = []
+    public var dependencies: [AnyCancellable] = []
     public var pendingRefresh = false
 
     /// Read-only proxy to the stored value.

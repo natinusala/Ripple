@@ -14,8 +14,6 @@
     limitations under the License.
 */
 
-import OpenCombine
-
 import RippleCore
 import Yoga
 
@@ -86,10 +84,10 @@ public class MarginTarget: ViewModifierTarget, CustomStringConvertible {
     @Rippling var bottom: Dimension
     @Rippling var left: Dimension
 
-    var topSub: AnyCancellable?
-    var rightSub: AnyCancellable?
-    var bottomSub: AnyCancellable?
-    var leftSub: AnyCancellable?
+    var topSub: Subscription?
+    var rightSub: Subscription?
+    var bottomSub: Subscription?
+    var leftSub: Subscription?
 
     public var boundTarget: TargetNode?
 

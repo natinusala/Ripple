@@ -23,6 +23,17 @@ import OpenCombineDispatch
 public typealias ObservableSubject = PassthroughSubject<Void, Never>
 extension ObservableSubject: Hashable, Equatable {} // Uses default implementations defined in Extensions.swift
 
+/// Subscription created when starting an observation on an `Observable`.
+///
+/// Observing an observable value gives you a `Subscription` handle, which can be used
+/// to later cancel the subscription and stop running the closure when the value changes
+/// again.
+///
+/// The subscription is automatically cancelled when it goes out of scope. This is useful to prevent
+/// leaking, but it also means that you must store it somewhere during the whole time the observation
+/// needs to run to prevent the subscription from being cancelled too early.
+public typealias Subscription = AnyCancellable
+
 /// A value that can be observed for changes.
 ///
 /// If used directly, always use the `value` property to make sure
@@ -42,7 +53,7 @@ public protocol Observable: AnyObject {
 
     /// List of other observables this observable depends on, in the form of Combine subscriptions.
     /// This observable will be refreshed if any of those dependent values change.
-    var subscriptions: [AnyCancellable] { get set }
+    var dependencies: [AnyCancellable] { get set }
 
     /// Is there already a refresh call pending in a dispatch queue?
     var pendingRefresh: Bool { get set }
@@ -68,11 +79,11 @@ extension Observable {
     /// Runs the given closure when the observed value changes. The closure will be executed
     /// on the main event queue, so at least one frame after the value actually changes.
     ///
-    /// Returns a Combine subscription that can be cancelled anytime using `cancel()`.
+    /// Returns a `Subscription` that can be cancelled anytime using `cancel()`.
     ///
-    /// The subscription must be stored, otherwise it will immediately
+    /// The subscription must be stored for the lifetime of the observation, otherwise it will
     /// be cancelled, even if a closure has already been put into the queue before cancellation.
-    public func observe(closure: @escaping (Value) -> ()) -> AnyCancellable {
+    public func observe(closure: @escaping (Value) -> ()) -> Subscription {
         // This method is for "final" observations, and users should be fine with waiting 16.66ms
         // before triggering the closure. This is why we can keep `.receive(on: DispatchQueue.main)`.
         self.subject
@@ -100,10 +111,10 @@ extension Observable {
         let value = self.evaluate()
 
         // Cancel previous subscriptions
-        for subscription in self.subscriptions {
+        for subscription in self.dependencies {
             subscription.cancel()
         }
-        self.subscriptions = []
+        self.dependencies = []
 
         // Setup new subscriptions: call this method every time any of the depending
         // observables change
@@ -112,7 +123,7 @@ extension Observable {
         }
 
         for subject in entry.subjects {
-            self.subscriptions.append(
+            self.dependencies.append(
                 // Do not receive on main queue for performance reasons: `drainMainQueue()` does not run closures
                 // that have been added to the queue from inside another closure. Instead, it waits for the next `drainMainQueue()` call.
                 // This is possibly to prevent hogging the main thread for too long, which is what we want.

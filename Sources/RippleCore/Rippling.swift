@@ -40,7 +40,7 @@ public typealias Ripplet<Value> = () -> Value
 @propertyWrapper
 public class Rippling<Value>: Observable {
     public let subject = ObservableSubject()
-    public var subscriptions: [AnyCancellable] = []
+    public var dependencies: [AnyCancellable] = []
     public var pendingRefresh = false
     public var cachedValue: Value?
 
