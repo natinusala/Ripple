@@ -16,19 +16,12 @@
 
 import OpenCombine
 
-/// A value that can be observed for changes. This is a non-property-wrapper variant of `State`
+/// A value that can be observed for changes. This is a non-property wrapper variant of `State`
 /// so that it can be used in protocols.
 ///
 /// Use the `value` property to get the value, and the `set(_:)` method to set it.
 public class Observed<Value>: Observable {
     @State var state: Value
-
-    public var pendingRefresh = false
-    public var cachedValue: Value? {
-        get { return self._state.cachedValue }
-        set { self._state.cachedValue = newValue }
-    }
-    public var dependencies: [AnyCancellable] = []
 
     /// Creates a new observed value with given initial value.
     public init(value: Value) {
@@ -46,5 +39,20 @@ public class Observed<Value>: Observable {
 
     public var subject: ObservableSubject {
         return self._state.subject
+    }
+
+    public var pendingRefresh: Bool {
+        get { return self._state.pendingRefresh}
+        set { self._state.pendingRefresh = newValue }
+    }
+
+    public var cachedValue: Value? {
+        get { return self._state.cachedValue }
+        set { self._state.cachedValue = newValue }
+    }
+    
+    public var dependencies: [AnyCancellable] {
+        get { return self._state.dependencies}
+        set { self._state.dependencies = newValue }
     }
 }
