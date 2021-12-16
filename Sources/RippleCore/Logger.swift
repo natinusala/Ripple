@@ -17,7 +17,7 @@
 import Rainbow
 
 public actor Logger {
-    // TODO: implement "labels" so that apps can enable / disable Loftwing logs
+    // TODO: implement "labels" so that apps can enable / disable Ripple logs
     // TODO: replace debug bools by debug facets with a name and add a prefix
     // TODO: use #file, #line and #function to improve debug messages
     // TODO: use autoclosures for message
