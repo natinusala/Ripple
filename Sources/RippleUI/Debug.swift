@@ -17,8 +17,8 @@
 // Those flags are used to toggle debug messages of various components of the
 // library at compile time. Please set them all to `false` before commiting.
 
-/// Enables logs for graphics API (OpenGL, Vulkan...)
-let debugGraphicsAPI = false
+/// Enables logs for graphics backend (OpenGL, Vulkan...)
+let debugGraphicsBackend = false
 
 /// Enables logs for layout engine.
 let debugLayout = false

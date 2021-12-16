@@ -38,25 +38,13 @@ protocol Platform {
     func poll()
 
     /// Creates, opens and makes current a new window.
-    func createWindow(title: String, mode: WindowMode, graphicsApi: GraphicsAPI) throws -> NativeWindow
+    func createWindow(title: String, mode: WindowMode, backend: GraphicsBackend) throws -> NativeWindow
 }
 
 /// Creates and returns the `Platform` handle for the currently running platform,
 /// or returns `nil` if none has been found.
 func createPlatform() throws -> Platform? {
     return try GLFWPlatform() // TODO: only return GLFW if it's actually available
-}
-
-/// The graphics API / renderer of an application.
-public enum GraphicsAPI {
-    /// OpenGL.
-    case gl
-
-    /// Selects the best available graphics API, or fatals if none was found.
-    public static func getDefault() -> GraphicsAPI {
-        // TODO: only return OpenGL if it's actually available
-        return .gl
-    }
 }
 
 /// Represents a native, platform-dependent window.

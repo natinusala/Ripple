@@ -25,19 +25,19 @@ import RippleCore
 public struct Window<Content>: Container where Content: View {
     @Rippling var title: String
     @Rippling var mode: WindowMode
-    @Rippling var graphicsApi: GraphicsAPI
+    @Rippling var backend: GraphicsBackend
 
     let content: Content
 
     public init(
         title: @escaping @autoclosure Ripplet<String>,
         mode: @escaping @autoclosure Ripplet<WindowMode> = .windowed(1280, 720),
-        graphicsApi: @escaping @autoclosure Ripplet<GraphicsAPI> = GraphicsAPI.getDefault(),
+        backend: @escaping @autoclosure Ripplet<GraphicsBackend> = GraphicsBackend.getDefault(),
         content: () -> Content
     ) {
         self._title = .init(title())
         self._mode = .init(mode())
-        self._graphicsApi = .init(graphicsApi())
+        self._backend = .init(backend())
 
         self.content = content()
     }
@@ -50,7 +50,7 @@ public struct Window<Content>: Container where Content: View {
         return WindowTarget(
             title: container._title,
             mode: container._mode,
-            graphicsApi: container._graphicsApi
+            backend: container._backend
         )
     }
 }
@@ -59,21 +59,21 @@ public struct Window<Content>: Container where Content: View {
 public class WindowTarget: ContainerTarget, FrameTarget {
     @Rippling var title: String
     @Rippling var mode: WindowMode
-    @Rippling var graphicsApi: GraphicsAPI
+    @Rippling var backend: GraphicsBackend
 
     let handle: NativeWindow
     var windowResizeSubscription: AnyCancellable?
 
-    init(title: Rippling<String>, mode: Rippling<WindowMode>, graphicsApi: Rippling<GraphicsAPI>) {
+    init(title: Rippling<String>, mode: Rippling<WindowMode>, backend: Rippling<GraphicsBackend>) {
         self._title = title
         self._mode = mode
-        self._graphicsApi = graphicsApi
+        self._backend = backend
 
         do {
             self.handle = try getContext().platform.createWindow(
                 title: title.value,
                 mode: mode.value,
-                graphicsApi: graphicsApi.value
+                backend: backend.value
             )
         } catch {
             Logger.error("Cannot create window: \(error.qualifiedName)")
@@ -124,8 +124,6 @@ public class WindowTarget: ContainerTarget, FrameTarget {
 
     /// Called anytime the native window is resized.
     func onResized() {
-        Logger.info("Window resized to \(self.handle.width)x\(self.handle.height)")
-
         self.resizeChildView()
     }
 }

@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+import Foundation
+
 import OpenCombine
 import GLFW
 import Glad
@@ -39,8 +41,8 @@ class GLFWPlatform: Platform {
         glfwPollEvents()
     }
 
-    func createWindow(title: String, mode: WindowMode, graphicsApi: GraphicsAPI) throws -> NativeWindow {
-        return try GLFWWindow(title: title, mode: mode, graphicsApi: graphicsApi)
+    func createWindow(title: String, mode: WindowMode, backend: GraphicsBackend) throws -> NativeWindow {
+        return try GLFWWindow(title: title, mode: mode, backend: backend)
     }
 }
 
@@ -50,13 +52,20 @@ class GLFWWindow: NativeWindow {
     var width: Float
     var height: Float
 
-    let skContext: OpaquePointer
+    /// Current graphics context.
+    var context: GraphicsContext
 
-    let canvas: Canvas
+    var skContext: OpaquePointer {
+        return self.context.skContext
+    }
+
+    var canvas: Canvas {
+        return self.context.canvas
+    }
 
     let resizeSubject = PassthroughSubject<(width: Float, height: Float), Never>()
 
-    init(title: String, mode: WindowMode, graphicsApi: GraphicsAPI) throws {
+    init(title: String, mode: WindowMode, backend: GraphicsBackend) throws {
         // Setup hints
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
@@ -129,11 +138,11 @@ class GLFWWindow: NativeWindow {
         // Initialize graphics API
         glfwMakeContextCurrent(handle)
 
-        switch graphicsApi {
+        switch backend {
             case .gl:
                 gladLoadGLLoaderFromGLFW()
 
-                if debugGraphicsAPI {
+                if debugGraphicsBackend {
                     glEnable(GLenum(GL_DEBUG_OUTPUT))
                     glDebugMessageCallback(
                         { _, type, id, severity, _, message, _ in
@@ -146,7 +155,7 @@ class GLFWWindow: NativeWindow {
 
         // Enable sRGB if requested
         if enableSRGB {
-            switch graphicsApi {
+            switch backend {
                 case .gl:
                     glEnable(UInt32(GL_FRAMEBUFFER_SRGB))
             }
@@ -159,75 +168,15 @@ class GLFWWindow: NativeWindow {
         self.width = Float(actualWindowWidth)
         self.height = Float(actualWindowHeight)
 
-        // Initialize Skia
-        var backendRenderTarget: OpaquePointer?
-        var context: OpaquePointer?
-
-        switch graphicsApi {
-            case .gl:
-                let interface = gr_glinterface_create_native_interface()
-                context = gr_direct_context_make_gl(interface)
-
-                var framebufferInfo = gr_gl_framebufferinfo_t(
-                    fFBOID: 0,
-                    fFormat: UInt32(enableSRGB ? GL_SRGB8_ALPHA8 : GL_RGBA8)
-                )
-
-                backendRenderTarget = gr_backendrendertarget_new_gl(
-                    actualWindowWidth,
-                    actualWindowHeight,
-                    0,
-                    0,
-                    &framebufferInfo
-                )
-        }
-
-        guard let context = context else {
-            throw SkiaError.cannotInitSkiaContext
-        }
-
-        self.skContext = context
-
-        guard let target = backendRenderTarget else {
-            throw SkiaError.cannotInitSkiaTarget
-        }
-
-        let colorSpace: OpaquePointer? = enableSRGB ? sk_colorspace_new_srgb() : nil
-
-        let surface = sk_surface_new_backend_render_target(
-            context,
-            target,
-            BOTTOM_LEFT_GR_SURFACE_ORIGIN,
-            RGBA_8888_SK_COLORTYPE,
-            colorSpace,
-            nil
+        // Initialize context
+        self.context = try GraphicsContext(
+            width: self.width,
+            height: self.height,
+            backend: backend
         )
-
-        if surface == nil {
-            throw SkiaError.cannotInitSkiaSurface
-        }
-
-        Logger.info("Created \(graphicsApi) context:")
-
-        switch graphicsApi {
-            case .gl:
-                var majorVersion: GLint = 0
-                var minorVersion: GLint = 0
-                glGetIntegerv(GLenum(GL_MAJOR_VERSION), &majorVersion)
-                glGetIntegerv(GLenum(GL_MINOR_VERSION), &minorVersion)
-
-                Logger.info("   - Version: \(majorVersion).\(minorVersion)")
-                Logger.info("   - GLSL version: \(String(cString: glGetString(GLenum(GL_SHADING_LANGUAGE_VERSION))!))")
-        }
 
         // Finalize init
         glfwSwapInterval(1)
-
-        guard let nativeCanvas = sk_surface_get_canvas(surface) else {
-            throw SkiaError.cannotInitSkiaCanvas
-        }
-
-        self.canvas = SkiaCanvas(handle: nativeCanvas)
 
         // Set the `GLFWWindow` pointer as GLFW window userdata
         let unretainedSelf = Unmanaged.passUnretained(self)
@@ -253,8 +202,23 @@ class GLFWWindow: NativeWindow {
 
     /// Called whenever this window is resized.
     func onResized(width: Float, height: Float) {
+        // Set new dimensions
         self.width = width
         self.height = height
+
+        // Create a new context with new dimensions
+        do {
+            self.context = try GraphicsContext(
+                width: width,
+                height: height,
+                backend: self.context.backend
+            )
+        } catch {
+            Logger.error("Cannot create new graphics context: \(error)")
+            exit(-1)
+        }
+
+        // Fire our resize event
         self.resizeSubject.send((width: width, height: height))
     }
 }
@@ -266,13 +230,6 @@ enum GLFWError: Error {
     case cannotCreateWindow
 }
 
-enum SkiaError: Error {
-    case cannotInitSkiaSurface
-    case cannotInitSkiaTarget
-    case cannotInitSkiaContext
-    case cannotInitSkiaCanvas
-}
-
 /// Called when any GLFW window is resized. `GLFWWindow` reference can be retrieved
 /// from the window user pointer.
 private func onWindowResized(window: OpaquePointer, width: Int32, height: Int32) {
@@ -282,5 +239,5 @@ private func onWindowResized(window: OpaquePointer, width: Int32, height: Int32)
 }
 
 private func onGlDebugMessage(severity: GLenum, type: GLenum, id: GLuint, message: UnsafePointer<CChar>?) {
-    Logger.debug(debugGraphicsAPI, "OpenGL \(severity) \(id): \(message.str ?? "unspecified")")
+    Logger.debug(debugGraphicsBackend, "OpenGL \(severity) \(id): \(message.str ?? "unspecified")")
 }
