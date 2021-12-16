@@ -83,11 +83,9 @@ public class WindowTarget: ContainerTarget, FrameTarget {
         super.init()
 
         // Subscribe to the native window resize event
-        self.windowResizeSubscription = self.handle.resizeSubject
-            .receive(on: DispatchQueue.main)
-            .sink { _, _ in
-                self.onResized()
-            }
+        self.windowResizeSubscription = self.handle.dimensions.observe { _, _ in
+            self.onResized()
+        }
     }
 
     override public func insert(child: inout TargetNode, at position: UInt?) {
@@ -98,8 +96,8 @@ public class WindowTarget: ContainerTarget, FrameTarget {
     /// Resizes the child view to fill the whole window.
     func resizeChildView() {
         if var child = self.children[0] as? LayoutTarget {
-            child.width = .dip(self.handle.width)
-            child.height = .dip(self.handle.height)
+            child.width = .dip(self.handle.dimensions.value.width)
+            child.height = .dip(self.handle.dimensions.value.height)
         }
     }
 

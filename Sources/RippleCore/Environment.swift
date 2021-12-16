@@ -128,7 +128,7 @@ public class Environment<Value>: Observable {
     }
 
     public var wrappedValue: Value {
-        get { self.value } // Use self.value for observable value access recording
+        get { self.value } // Use self.value to enable observable access recording
     }
 
     public func evaluate() -> Value {

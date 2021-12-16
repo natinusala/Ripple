@@ -49,8 +49,7 @@ class GLFWPlatform: Platform {
 class GLFWWindow: NativeWindow {
     let handle: OpaquePointer?
 
-    var width: Float
-    var height: Float
+    var dimensions: Observed<Dimensions>
 
     /// Current graphics context.
     var context: GraphicsContext
@@ -62,8 +61,6 @@ class GLFWWindow: NativeWindow {
     var canvas: Canvas {
         return self.context.canvas
     }
-
-    let resizeSubject = PassthroughSubject<(width: Float, height: Float), Never>()
 
     init(title: String, mode: WindowMode, backend: GraphicsBackend) throws {
         // Setup hints
@@ -165,13 +162,12 @@ class GLFWWindow: NativeWindow {
         var actualWindowHeight: Int32 = 0
         glfwGetWindowSize(handle, &actualWindowWidth, &actualWindowHeight)
 
-        self.width = Float(actualWindowWidth)
-        self.height = Float(actualWindowHeight)
+        self.dimensions = Observed<Dimensions>(value: (width: Float(actualWindowWidth), height: Float(actualWindowHeight)))
 
         // Initialize context
         self.context = try GraphicsContext(
-            width: self.width,
-            height: self.height,
+            width: self.dimensions.value.width,
+            height: self.dimensions.value.height,
             backend: backend
         )
 
@@ -203,8 +199,7 @@ class GLFWWindow: NativeWindow {
     /// Called whenever this window is resized.
     func onResized(width: Float, height: Float) {
         // Set new dimensions
-        self.width = width
-        self.height = height
+        self.dimensions.set((width: width, height: height))
 
         // Create a new context with new dimensions
         do {
@@ -217,9 +212,6 @@ class GLFWWindow: NativeWindow {
             Logger.error("Cannot create new graphics context: \(error)")
             exit(-1)
         }
-
-        // Fire our resize event
-        self.resizeSubject.send((width: width, height: height))
     }
 }
 

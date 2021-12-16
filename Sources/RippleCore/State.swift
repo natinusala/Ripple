@@ -34,7 +34,7 @@ public class State<Value>: Observable {
     }
 
     public var wrappedValue: Value {
-        get { return self.value } // Use self.value for observable value access recording
+        get { return self.value } // Use self.value to enable observable access recording
         set { self.cachedValue = newValue }
     }
 

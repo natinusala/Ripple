@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-import OpenCombine
+import RippleCore
 
 /// Enable sRGB color space?
 /// TODO: make it user-customizable should anyone care about sRGB
@@ -49,21 +49,17 @@ func createPlatform() throws -> Platform? {
 
 /// Represents a native, platform-dependent window.
 protocol NativeWindow {
+    typealias Dimensions = (width: Float, height: Float)
+
     /// Should return true if the platform requested the window to close.
     var shouldClose: Bool { get }
 
-    /// Window width.
-    var width: Float { get }
-
-    /// Window height.
-    var height: Float { get }
+    /// Window dimensions.
+    var dimensions: Observed<Dimensions> { get }
 
     /// Graphics canvas for this window.
     var canvas: Canvas { get }
 
     /// Swap graphic buffers ("flush" the canvas).
     func swapBuffers()
-
-    /// Combine subject fired when the window dimensions change.
-    var resizeSubject: PassthroughSubject<(width: Float, height: Float), Never> { get }
 }
