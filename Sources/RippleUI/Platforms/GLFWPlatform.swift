@@ -48,7 +48,7 @@ class GLFWPlatform: Platform {
 class GLFWWindow: NativeWindow {
     let handle: OpaquePointer?
 
-    var dimensions: Observed<Dimensions>
+    var dimensions: ObservedValue<Dimensions>
 
     /// Current graphics context.
     var context: GraphicsContext
@@ -161,7 +161,7 @@ class GLFWWindow: NativeWindow {
         var actualWindowHeight: Int32 = 0
         glfwGetWindowSize(handle, &actualWindowWidth, &actualWindowHeight)
 
-        self.dimensions = Observed<Dimensions>(value: (width: Float(actualWindowWidth), height: Float(actualWindowHeight)))
+        self.dimensions = ObservedValue<Dimensions>(value: (width: Float(actualWindowWidth), height: Float(actualWindowHeight)))
 
         // Initialize context
         self.context = try GraphicsContext(

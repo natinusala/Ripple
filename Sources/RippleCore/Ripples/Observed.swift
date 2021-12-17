@@ -20,7 +20,7 @@ import OpenCombine
 /// so that it can be used in protocols.
 ///
 /// Use the `value` property to get the value, and the `set(_:)` method to set it.
-public class Observed<Value>: Observable {
+public class ObservedValue<Value>: Observable {
     @State var state: Value
 
     /// Creates a new observed value with given initial value.

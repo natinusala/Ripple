@@ -55,7 +55,7 @@ protocol NativeWindow {
     var shouldClose: Bool { get }
 
     /// Window dimensions.
-    var dimensions: Observed<Dimensions> { get }
+    var dimensions: ObservedValue<Dimensions> { get }
 
     /// Graphics canvas for this window.
     var canvas: Canvas { get }
