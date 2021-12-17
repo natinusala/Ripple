@@ -20,6 +20,7 @@ import OpenCombine
 /// so that it can be used in protocols.
 ///
 /// Use the `value` property to get the value, and the `set(_:)` method to set it.
+/// TODO: State should be using an ObservedValue internally and not the other way around
 public class ObservedValue<Value>: Observable {
     @State var state: Value
 
