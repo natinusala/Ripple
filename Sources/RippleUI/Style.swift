@@ -14,33 +14,33 @@
     limitations under the License.
 */
 
-/// The background of a shape.
-public struct Background {
+/// A "fill" color or shader.
+public struct Fill {
     /// Function to call to create the paint from the
-    /// shape boundaries.
+    /// boundaries.
     typealias Factory = (Rect) -> Paint
 
-    /// This function will be called whenever the shape
-    /// position or dimensions change to recreate the background
+    /// This function will be called whenever the fill
+    /// position or dimensions change to recreate the
     /// paint.
     var paintFactory: Factory
 
-    /// Creates a new background with the given solid color.
-    public static func color(_ color: Color) -> Background {
+    /// Creates a new fill with the given solid color.
+    public static func color(_ color: Color) -> Fill {
         let factory: Factory = { _ in
             return Paint(color: color)
         }
 
-        return Background(paintFactory: factory)
+        return Fill(paintFactory: factory)
     }
 
-    /// Creates a new background with the given radial gradient. Radius will be applied
+    /// Creates a new fill with the given radial gradient. Radius will be applied
     /// for both horizontal and vertical axis.
     public static func radialGradient(
         center: (x: Dimension, y: Dimension),
         radius: Dimension,
         stops: [(Color, Dimension)]
-    ) -> Background {
+    ) -> Fill {
         return .radialGradient(
             center: center,
             radius: (h: radius, v: radius),
@@ -48,12 +48,12 @@ public struct Background {
         )
     }
 
-    /// Creates a new background with the given radial gradient.
+    /// Creates a new fill with the given radial gradient.
     public static func radialGradient(
         center: (x: Dimension, y: Dimension),
         radius: (h: Dimension, v: Dimension),
         stops: [(Color, Dimension)]
-    ) -> Background {
+    ) -> Fill {
         let factory: Factory = { layout in
             return Paint(shader: .radialGradient(
                 center: (x: applyDimension(center.x, on: layout.width), y: applyDimension(center.y, on: layout.height)),
@@ -71,7 +71,7 @@ public struct Background {
             ))
         }
 
-        return Background(
+        return Fill(
             paintFactory: factory
         )
     }
@@ -84,32 +84,13 @@ public struct Background {
             case let .percentage(percentage):
                 return percentage.scaleFactor * size
             case .auto:
-                fatalError("`auto` is not a valid value for backgrounds")
+                fatalError("`auto` is not a valid value for fills")
         }
     }
 }
 
-/// A shape.
-public struct Shape {
-    /// Background definition.
-    var background: Background?
-
-    /// Actual background paint, generated from the definition.
-    var backgroundPaint: Paint?
-
-    /// Boundaries for the shape.
-    var layout: Rect = Rect() {
-        didSet {
-            // Recreate everything
-            self.backgroundPaint = self.background?.paintFactory(self.layout)
-        }
-    }
-
-    /// Draws the shape.
-    func draw(canvas: Canvas) {
-        // Background
-        if let paint = self.backgroundPaint {
-            canvas.drawRect(self.layout, paint: paint)
-        }
-    }
+/// Holds the "style" of something: fill color, stroke, shadow...
+public struct Style {
+    /// Fill definition.
+    var fill: Fill?
 }

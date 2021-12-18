@@ -14,19 +14,7 @@
     limitations under the License.
 */
 
-import RippleCore
-
-/// A simple solid color rectangle.
-public struct Rectangle: View {
-    @Rippling var color: Color
-
-    /// Creates a new rectangle.
-    public init(color: @autoclosure @escaping Ripplet<Color>) {
-        self._color = .init(color())
-    }
-
-    public var body: some View {
-        EmptyView()
-            .fill(.color(color))
-    }
+/// Definition of a font: typeface, size, skew...
+public struct Font {
+    
 }

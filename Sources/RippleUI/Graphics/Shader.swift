@@ -34,7 +34,7 @@ public struct Shader {
         var colorPos = colors.map { $0.1 }
         var colors = colors.map { $0.0.value }
 
-        var matrix = Matrix.identity().scale(sx: radius.v, sy: radius.h, px: center.x, py: center.y)
+        var matrix = Matrix.identity().scale(sx: radius.h, sy: radius.v, px: center.x, py: center.y)
 
         let handle = sk_shader_new_radial_gradient(&point, 1, &colors, &colorPos, Int32(colors.count), CLAMP_SK_SHADER_TILEMODE, &matrix.handle)
 

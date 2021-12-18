@@ -19,7 +19,7 @@ import RippleCore
 import Yoga
 
 /// Target of a view.
-public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundShapeTarget {
+public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, StyleTarget {
     public let type: TargetType = .view
 
     public var children: [TargetNode] = []
@@ -27,17 +27,39 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
 
     private let ygNode: YGNodeRef
 
-    var background = Shape()
+    var style = Style() {
+        didSet {
+            self.recreateStylePaints()
+        }
+    }
+
+    var fillPaint: Paint?
 
     public private(set) var layout = Rect(
         x: 0,
         y: 0,
         width: 0,
         height: 0
-    )
+    ) {
+        didSet {
+            self.recreateStylePaints()
+        }
+    }
 
     init() {
         self.ygNode = YGNodeNew()
+    }
+
+    /// Called whenever the view layout changes or the style changes to recreate
+    /// the drawn paints.
+    func recreateStylePaints() {
+        // Only make fill if the view has a width and a height
+        if self.layout.width > 0 && self.layout.height > 0 {
+            self.fillPaint = self.style.fill?.paintFactory(self.layout)
+        }
+        else {
+            self.fillPaint = nil
+        }
     }
 
     public func insert(child: inout TargetNode, at position: UInt?) {
@@ -116,13 +138,13 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
     }
 
     /// Called when this view's layout changes.
-    open func onLayout() {
-        self.background.layout = self.layout
-    }
+    open func onLayout() {}
 
     open func draw(canvas: Canvas) {
-        // Draw the background
-        self.background.draw(canvas: canvas)
+        // Fill
+        if let paint = self.fillPaint {
+            canvas.drawRect(self.layout, paint: paint)
+        }
     }
 
     var axis: Axis {
