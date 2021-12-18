@@ -26,15 +26,17 @@ public struct Shader {
 
     /// Creates a new shader with the given radial gradient.
     public static func radialGradient(
-        center: (Float, Float),
-        radius: Float,
+        center: (x: Float, y: Float),
+        radius: (h: Float, v: Float),
         colors: [(Color, Float)]
     ) -> Shader {
-        var point = sk_point_t(x: center.0, y: center.1)
+        var point = sk_point_t(x: center.x, y: center.y)
         var colorPos = colors.map { $0.1 }
         var colors = colors.map { $0.0.value }
 
-        let handle = sk_shader_new_radial_gradient(&point, radius, &colors, &colorPos, Int32(colors.count), CLAMP_SK_SHADER_TILEMODE, nil)
+        var matrix = Matrix.identity().scale(sx: radius.v, sy: radius.h, px: center.x, py: center.y)
+
+        let handle = sk_shader_new_radial_gradient(&point, 1, &colors, &colorPos, Int32(colors.count), CLAMP_SK_SHADER_TILEMODE, &matrix.handle)
 
         guard let handle = handle else {
             fatalError("Cannot create radial gradient shader: `sk_shader_new_radial_gradient` returned NULL")

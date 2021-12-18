@@ -41,6 +41,7 @@ public struct Rect: Equatable, CustomStringConvertible {
 
     public internal(set) var skRect: sk_rect_t
 
+    /// Creates a new rectangle with given position and dimensions.
     public init(x: Float, y: Float, width: Float, height: Float) {
         self.x = x
         self.y = y
@@ -48,6 +49,11 @@ public struct Rect: Equatable, CustomStringConvertible {
         self.height = height
 
         self.skRect = sk_rect_t(left: x, top: y, right: x + width, bottom: y + height)
+    }
+
+    /// Creates a new rectangle at (0, 0) with no width and height.
+    public init() {
+        self.init(x: 0, y: 0, width: 0, height: 0)
     }
 
     mutating func updateSkRect() {

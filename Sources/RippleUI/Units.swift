@@ -19,6 +19,7 @@ import Yoga
 /// A percentage, typically ranging from 0 to 100, but can also
 /// represent negative percentages or more than 100%.
 public struct Percentage: Equatable {
+    /// Value (usually between 0 and 100, but out of bounds is valid).
     public let value: Float
 
     /// Creates a new percentage value from given float.
@@ -28,6 +29,12 @@ public struct Percentage: Equatable {
 
     public static func == (lhs: Percentage, rhs: Percentage) -> Bool {
         return lhs.value == rhs.value
+    }
+
+    /// Returns this percentage between 0.0 and 1.0 to use as a
+    /// scaling factor.
+    public var scaleFactor: Float {
+        return self.value / 100.0
     }
 }
 

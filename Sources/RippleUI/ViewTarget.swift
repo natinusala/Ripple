@@ -74,6 +74,8 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
                 child.updateLayout(parentX: self.layout.x, parentY: self.layout.y)
             }
         }
+
+        self.onLayout()
     }
 
     /// Calculates layout of this view, either by calculating layout of its parent
@@ -113,9 +115,14 @@ public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, BackgroundSha
         }
     }
 
+    /// Called when this view's layout changes.
+    open func onLayout() {
+        self.background.layout = self.layout
+    }
+
     open func draw(canvas: Canvas) {
         // Draw the background
-        self.background.draw(canvas: canvas, in: self.layout)
+        self.background.draw(canvas: canvas)
     }
 
     var axis: Axis {

@@ -46,7 +46,7 @@ public class BackgroundTarget: ObservingViewModifierTarget<Background>, CustomSt
 
     override public func reset() {
         if var backgroundTarget = self.boundTarget as? BackgroundShapeTarget {
-            backgroundTarget.background.background = Background()
+            backgroundTarget.background.background = nil
         }
     }
 
