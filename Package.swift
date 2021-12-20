@@ -29,14 +29,29 @@ let package = Package(
     products: [
         .executable(name: "RippleDemo", targets: ["RippleDemo"]),
         .library(name: "Ripple", targets: ["Ripple"]),
+        .plugin(name: "ResourcesPlugin", targets: ["ResourcesPlugin"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swift-server/swift-backtrace.git", .upToNextMajor(from: "1.3.1")),
         .package(url: "https://github.com/OpenCombine/OpenCombine.git", from: "0.12.0"),
         .package(url: "https://github.com/natinusala/Async.git", branch: "a20ccabfdaf740f14b42eadf46fa9baac882078f"),
         .package(url: "https://github.com/onevcat/Rainbow.git", .upToNextMajor(from: "4.0.0")),
+        .package(url: "https://github.com/apple/swift-tools-support-core.git", .upToNextMajor(from: "0.2.4")),
     ],
     targets: [
+        .executableTarget(
+            name: "ResourcesCodegen",
+            dependencies: [
+                .product(name: "TSCBasic", package: "swift-tools-support-core")
+            ]
+        ),
+        .plugin(
+            name: "ResourcesPlugin",
+            capability: .buildTool(),
+            dependencies: [
+                "ResourcesCodegen",
+            ]
+        ),
         .target(
             name: "CYoga",
             path: "External/CYoga",
