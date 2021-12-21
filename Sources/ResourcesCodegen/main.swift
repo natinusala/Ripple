@@ -27,12 +27,32 @@ let output = AbsolutePath(CommandLine.arguments[2])
 let fileManager = FileManager.default
 
 // Build generated code
-var lines: [String] = []
+let ext = input.extension ?? ""
+var varName = input.basenameWithoutExt
 
-lines += ["import Ripple"]
-lines += ["extension Resource {"]
-lines += ["    "]
-lines += ["}"]
+let toReplace = [
+    " ",
+    ".",
+    "-",
+]
+
+for token in toReplace {
+    varName = varName.replacingOccurrences(of: token, with: "_")
+}
+
+var lines: [String] = [
+    "import Foundation",
+    "import Ripple",
+    "extension Resource where Self == URL {",
+    "    static var \(varName): Self {",
+    "        guard let url = Bundle.module.url(forResource: \"\(input.basenameWithoutExt)\", withExtension: \"\(ext)\") else {",
+    "            Logger.error(\"Could not find resource `\(input.basenameWithoutExt)` (with extension `\(ext)`)\")",
+    "            exit(-1)",
+    "        }",
+    "        return url",
+    "    }",
+    "}",
+]
 
 // Write output to file
 var generated = lines.joined(separator: "\n")

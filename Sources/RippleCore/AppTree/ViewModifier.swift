@@ -41,7 +41,7 @@ extension ViewModifier {
     }
 
     /// Default implementation of `makeTarget(of:)`.
-    public static func makeTarget(of view: Self) -> Never {
+    public static func makeTarget(of modifier: Self) -> Never {
         fatalError("`makeTarget(of:)` called on a view modifier without a target")
     }
 }

@@ -18,7 +18,7 @@ import RippleCore
 
 /// Displays one or multiple lines of text.
 ///
-/// By default, a `Text` does not have any font or style. Corresponding
+/// By default, a `Text` does not have any font or style. Appropriate
 /// modifiers must always be used with every `Text` otherwise nothing
 /// will be rendered on screen.
 ///
@@ -33,8 +33,7 @@ public struct Text: View {
 
     /// Creates a new text with given string and font.
     public init(
-        _ text: @escaping @autoclosure Ripplet<String>,
-        font:  @escaping @autoclosure Ripplet<Font>
+        _ text: @escaping @autoclosure Ripplet<String>
     ) {
         self._text = .init(text())
     }
