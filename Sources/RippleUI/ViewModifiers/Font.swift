@@ -37,8 +37,8 @@ public struct FontModifier: ViewModifier {
 public extension View {
     /// Changes the font of the text (typeface and size).
     func font(
-        typeface: @escaping @autoclosure Ripplet<Resource>,
-        size: @escaping @autoclosure Ripplet<DIP>
+        typeface: @escaping @autoclosure () -> Resource,
+        size: @escaping @autoclosure () -> DIP
     ) -> some View {
         return modifier(FontModifier(typeface: .init(typeface()), size: .init(size())))
     }

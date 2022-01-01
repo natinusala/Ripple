@@ -32,7 +32,7 @@ public struct ShrinkModifier: ViewModifier {
 
 public extension View {
     /// Changes the shrink factor of the view.
-    func shrink(_ shrink: @autoclosure @escaping Ripplet<Float>) -> some View {
+    func shrink(_ shrink: @escaping @autoclosure () -> Float) -> some View {
         return modifier(ShrinkModifier(shrink: .init(shrink())))
     }
 }

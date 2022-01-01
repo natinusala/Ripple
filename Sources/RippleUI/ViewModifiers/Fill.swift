@@ -31,7 +31,7 @@ public struct FillModifier: ViewModifier {
 
 public extension View {
     /// Changes the fill of the view.
-    func fill(_ fill: @autoclosure @escaping Ripplet<Fill>) -> some View {
+    func fill(_ fill: @escaping @autoclosure () -> Fill) -> some View {
         return modifier(FillModifier(fill: .init(fill())))
     }
 }

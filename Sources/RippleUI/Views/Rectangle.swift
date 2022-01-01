@@ -21,8 +21,8 @@ public struct Rectangle: View {
     @Rippling var color: Color
 
     /// Creates a new rectangle.
-    public init(color: @autoclosure @escaping Ripplet<Color>) {
-        self._color = .init(color())
+    public init(color: Rippling<Color>) {
+        self._color = color
     }
 
     public var body: some View {

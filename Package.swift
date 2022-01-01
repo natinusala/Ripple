@@ -29,7 +29,7 @@ let package = Package(
     products: [
         .executable(name: "RippleDemo", targets: ["RippleDemo"]),
         .library(name: "Ripple", targets: ["Ripple"]),
-        .plugin(name: "ResourcesPlugin", targets: ["ResourcesPlugin"]),
+        .plugin(name: "RipplePlugin", targets: ["RipplePlugin"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swift-server/swift-backtrace.git", .upToNextMajor(from: "1.3.1")),
@@ -37,19 +37,28 @@ let package = Package(
         .package(url: "https://github.com/natinusala/Async.git", branch: "a20ccabfdaf740f14b42eadf46fa9baac882078f"),
         .package(url: "https://github.com/onevcat/Rainbow.git", .upToNextMajor(from: "4.0.0")),
         .package(url: "https://github.com/apple/swift-tools-support-core.git", .upToNextMajor(from: "0.2.4")),
+        .package(url: "https://github.com/apple/swift-syntax.git", revision: "swift-DEVELOPMENT-SNAPSHOT-2021-12-06-a"), // TODO: change to stable 5.6 once it's out
     ],
     targets: [
         .executableTarget(
             name: "ResourcesCodegen",
             dependencies: [
-                .product(name: "TSCBasic", package: "swift-tools-support-core")
+                .product(name: "TSCBasic", package: "swift-tools-support-core"),
+            ]
+        ),
+        .executableTarget(
+            name: "RipplingCodegen",
+            dependencies: [
+                .product(name: "TSCBasic", package: "swift-tools-support-core"),
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
             ]
         ),
         .plugin(
-            name: "ResourcesPlugin",
+            name: "RipplePlugin",
             capability: .buildTool(),
             dependencies: [
                 "ResourcesCodegen",
+                "RipplingCodegen",
             ]
         ),
         .target(
@@ -134,6 +143,9 @@ let package = Package(
                 "GLFW",
                 "Glad",
                 "Skia",
+            ],
+            plugins: [
+                .plugin(name: "RipplePlugin"),
             ]
         ),
         .target(

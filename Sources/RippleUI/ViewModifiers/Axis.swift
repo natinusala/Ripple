@@ -32,7 +32,7 @@ public struct AxisModifier: ViewModifier {
 
 public extension View {
     /// Modifies the axis of the node.
-    func axis(_ axis: @autoclosure @escaping Ripplet<Axis>) -> some View {
+    func axis(_ axis: @escaping @autoclosure () -> Axis) -> some View {
         return modifier(AxisModifier(axis: .init(axis())))
     }
 }

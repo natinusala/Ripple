@@ -31,11 +31,9 @@ public struct Text: View {
 
     @Rippling var text: String
 
-    /// Creates a new text with given string and font.
-    public init(
-        _ text: @escaping @autoclosure Ripplet<String>
-    ) {
-        self._text = .init(text())
+    /// Creates a new text with given string.
+    public init(_ text: Rippling<String>) {
+        self._text = text
     }
 
     public static func makeTarget(of view: Text) -> TextTarget {

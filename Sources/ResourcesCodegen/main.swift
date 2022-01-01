@@ -24,8 +24,6 @@ import TSCBasic
 let input = AbsolutePath(CommandLine.arguments[1])
 let output = AbsolutePath(CommandLine.arguments[2])
 
-let fileManager = FileManager.default
-
 // Build generated code
 let ext = input.extension ?? ""
 var varName = input.basenameWithoutExt

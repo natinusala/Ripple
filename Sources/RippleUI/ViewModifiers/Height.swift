@@ -33,7 +33,7 @@ public struct HeightModifier: ViewModifier {
 
 public extension View {
     /// Changes the height of the view.
-    func height(_ height: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+    func height(_ height: @escaping @autoclosure () -> Dimension) -> some View {
         return modifier(HeightModifier(height: .init(height())))
     }
 }

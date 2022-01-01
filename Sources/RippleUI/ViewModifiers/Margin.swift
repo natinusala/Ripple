@@ -38,17 +38,17 @@ public struct MarginModifier: ViewModifier {
 
 public extension View {
     /// Sets the margin of the view for all 4 edges.
-    func margin(_ margin: @autoclosure @escaping Ripplet<Dimension>) -> some View {
+    func margin(_ margin: @escaping @autoclosure () -> Dimension) -> some View {
         let rippling = Rippling<Dimension>(margin())
         return modifier(MarginModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
     }
 
     /// Sets the margin of the view for specified edges.
     func margin(
-        top: @autoclosure @escaping Ripplet<Dimension> = 0,
-        right: @autoclosure @escaping Ripplet<Dimension> = 0,
-        bottom: @autoclosure @escaping Ripplet<Dimension> = 0,
-        left: @autoclosure @escaping Ripplet<Dimension> = 0
+        top: @escaping @autoclosure () -> Dimension = 0,
+        right: @escaping @autoclosure () -> Dimension = 0,
+        bottom: @escaping @autoclosure () -> Dimension = 0,
+        left: @escaping @autoclosure () -> Dimension = 0
     ) -> some View {
         return modifier(
             MarginModifier(
@@ -63,8 +63,8 @@ public extension View {
     /// Sets the margin of the view for both horizontal edges (left / right)
     /// and vertical edges (top / bottom).
     func margin(
-        horizontal: @autoclosure @escaping Ripplet<Dimension> = 0,
-        vertical: @autoclosure @escaping Ripplet<Dimension> = 0
+        horizontal: @escaping @autoclosure () -> Dimension = 0,
+        vertical: @escaping @autoclosure () -> Dimension = 0
     ) -> some View {
         return modifier(
             MarginModifier(

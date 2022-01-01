@@ -29,15 +29,16 @@ public struct Window<Content>: Container where Content: View {
 
     let content: Content
 
+    /// Creates a new desktop window.
     public init(
-        title: @escaping @autoclosure Ripplet<String>,
-        mode: @escaping @autoclosure Ripplet<WindowMode> = .windowed(1280, 720),
-        backend: @escaping @autoclosure Ripplet<GraphicsBackend> = GraphicsBackend.getDefault(),
+        title: Rippling<String>,
+        mode: Rippling<WindowMode> = .init(.windowed(1280, 720)),
+        backend: Rippling<GraphicsBackend> = .init(GraphicsBackend.getDefault()),
         content: () -> Content
     ) {
-        self._title = .init(title())
-        self._mode = .init(mode())
-        self._backend = .init(backend())
+        self._title = title
+        self._mode = mode
+        self._backend = backend
 
         self.content = content()
     }

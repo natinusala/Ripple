@@ -16,22 +16,21 @@
 
 import OpenCombine
 
-/// A ripplet is the input function for a rippling value.
-///
-/// To be used in views initializers when a rippling is needed, with both
-/// `@autoclosure` and `@escaping` attributes.
-///
-/// The compiler will synthetize an internal initializer for user views
-/// so that you don't need to explicitely use a ripplet, however
-/// library-provided views need an explicit public initializer
-/// where ripplets need to be used.
-public typealias Ripplet<Value> = () -> Value
-
 /// A value made from an expression of multiple other rippling values or state variables.
 ///
 /// The value can be made from a literal, any variable, a state variable or any expression.
 /// If the bound value is an expression and depends on any other rippling or state variable,
 /// the expression will automatically be re-evaluated when any dependent values change.
+///
+/// Most of the time, the default compiler synthetized initializer for your views will be enough.
+/// However, if you need a custom initializer use `Rippling<Value>` as the parameter type
+/// and set the rippling property with an underscore prefix to access the underlying `Rippling` and not the
+/// wrapped value. The Ripple SwiftPM plugin will then take care of generating an extension for the struct
+/// containing a new `init` implementation with the correct type. The generated `init` will call your
+/// own `init`.
+///
+/// If you need default values for a rippling parameter in `init`, you have to give Swift a `Rippling<Value>`
+/// and not a `Value`. The shortest way is to do `parameter: Rippling<Value> = .init(value)`.
 ///
 /// The `observe(closure:)` method can be used to setup an observer that will be triggered
 /// anytime the bound value changes.
@@ -48,14 +47,14 @@ public class Rippling<Value>: Observable {
     let function: () -> Value
 
     /// Creates a new rippling to the given value.
-    public init(_ function:  @escaping @autoclosure Ripplet<Value>) {
+    public init(_ function: @escaping @autoclosure () -> Value) {
         self.function = function
         self.refreshCachedValue()
     }
 
     /// Creates a new binding to the given value.
-    /// Convenience initializer for property wrapper support.
-    public convenience init(wrappedValue: @escaping @autoclosure Ripplet<Value>) {
+    /// This convenience init is used by compiler synthetized structs initializers.
+    public convenience init(wrappedValue: @escaping @autoclosure () -> Value) {
         self.init(wrappedValue())
     }
 

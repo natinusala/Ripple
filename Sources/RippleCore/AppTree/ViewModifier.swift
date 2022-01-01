@@ -121,6 +121,7 @@ public extension ViewModifierTarget {
 /// Override the `onValueChange(newValue:)` method to implement your changes.
 /// `apply()` does not need to be overridden as it already calls `onValueChange(newValue:)`.
 /// `reset()` can be overridden if needed.
+/// TODO: can didSet be used instead of .observe?
 open class ObservingViewModifierTarget<Value>: ViewModifierTarget {
     public internal(set) var observedValue: Value
 
