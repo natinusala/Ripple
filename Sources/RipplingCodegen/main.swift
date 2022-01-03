@@ -20,8 +20,13 @@ import SwiftSyntax
 import SwiftSyntaxParser
 import TSCBasic
 
-/// Code generator that looks up for any initializer with `Rippling<Value>` parameters in structs
-/// and emits a mirror initializer with `@escaping @autoclosure () -> Value` in place of every `Rippling<Value>`.
+// Code generator that looks up for any initializer with `Rippling<Value>` parameters in structs
+// and emits a mirror initializer with `@escaping @autoclosure () -> Value` in place of every `Rippling<Value>`.
+// These are for views and containers initializers.
+//
+// It also looks for any View extensions containing functions with rippling values and creates
+// another View extension containing the same function with parameters replaced.
+// These are for view modifiers.
 
 /// Makes a simple attribute with only an identifier.
 func makeSimpleAttribute(identifier: String) -> AttributeSyntax {
@@ -32,11 +37,12 @@ func makeSimpleAttribute(identifier: String) -> AttributeSyntax {
         argument: nil,
         rightParen: nil,
         tokenList: nil
-    ).withTrailingTrivia(Trivia(pieces: [.spaces(1)]))
+    ).withTrailingTrivia(Trivia.spaces(1))
 }
 
-class InitRewriter: SyntaxRewriter {
-    /// Visitor for initializer declarations.
+/// Rewriter for struct initializers and view modifiers functions.
+class Rewriter: SyntaxRewriter {
+    /// Rewriter for initializer declarations.
     override func visit(_ node: InitializerDeclSyntax) -> DeclSyntax {
         // Rewrite parameters to change from `Rippling` to escaping autoclosures
         let initParameters = node.parameters.parameterList.map { self.rewriteParameter($0) }
@@ -49,11 +55,63 @@ class InitRewriter: SyntaxRewriter {
             declNameArguments: nil
         )
 
-        // Only generate an initializer if there is at least one `Rippling` parameter
-        var generateInit = false
+        // Get parameters list for the generated `init` call
+        if let calledInitParameters = getCalledFunctionArguments(
+            parameterList: node.parameters.parameterList,
+            rewrittenParameters: initParameters
+        ) {
+            // First and only item in the body code block
+            let item = SyntaxFactory.makeFunctionCallExpr(
+                calledExpression: ExprSyntax(calledExpression),
+                leftParen: SyntaxFactory.makeLeftParenToken(),
+                argumentList: SyntaxFactory.makeTupleExprElementList(calledInitParameters),
+                rightParen: SyntaxFactory.makeRightParenToken(),
+                trailingClosure: nil,
+                additionalTrailingClosures: nil
+            )
 
-        // Parameters list for the generated `init` call
-        let parameters: [TupleExprElementSyntax] = zip(node.parameters.parameterList, initParameters.enumerated()).map { (originalParameter, rewrittenParameter) in
+            // Statement for that item
+            let statement = SyntaxFactory.makeCodeBlockItem(
+                item: Syntax(item),
+                semicolon: nil,
+                errorTokens: nil
+            ).withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(8)]))
+
+            return DeclSyntax(
+                node
+                    // Rewrite body to use our new code block
+                    .withBody(
+                        SyntaxFactory.makeCodeBlock(
+                            leftBrace: SyntaxFactory.makeLeftBraceToken(),
+                            statements: SyntaxFactory.makeCodeBlockItemList([statement]),
+                            rightBrace: SyntaxFactory.makeRightBraceToken().withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(4)]))
+                        )
+                    )
+                    // Rewrite parameters to use our new list
+                    .withParameters(SyntaxFactory.makeParameterClause(
+                        leftParen: SyntaxFactory.makeLeftParenToken(),
+                        parameterList: SyntaxFactory.makeFunctionParameterList(initParameters),
+                        rightParen: SyntaxFactory.makeRightParenToken()
+                    ).withTrailingTrivia(Trivia.spaces(1)))
+            )
+        }
+        else {
+            return DeclSyntax(SyntaxFactory.makeBlankUnknownDecl())
+        }
+    }
+
+    /// Creates parameters for the original called initializer or function (not the parameters of the
+    /// generated function). Will return `nil` if no rippling parameter is found in the original function,
+    /// in which case nothing should be emitted for that function.
+    /// `parameterList` is the parameters list of the original function.
+    /// `rewrittenParameters` is the list of rewritten parameters, aka the result of `rewriteParameters(parameterList)`.
+    func getCalledFunctionArguments(
+        parameterList: FunctionParameterListSyntax,
+        rewrittenParameters: [FunctionParameterSyntax]
+    ) -> [TupleExprElementSyntax]? {
+        var foundRippling = false
+
+        let list = zip(parameterList, rewrittenParameters.enumerated()).map { (originalParameter, rewrittenParameter) -> TupleExprElementSyntax in
             let index = rewrittenParameter.0
             let element = rewrittenParameter.1
 
@@ -87,7 +145,7 @@ class InitRewriter: SyntaxRewriter {
             let calledType = originalParameter.type?.as(SimpleTypeIdentifierSyntax.self)
 
             if calledType?.name.text == "Rippling" {
-                generateInit = true
+                foundRippling = true
 
                 // Autoclosure forwarding: parameter followed by `()`
                 let autoclosureForwarding = SyntaxFactory.makeFunctionCallExpr(
@@ -127,55 +185,21 @@ class InitRewriter: SyntaxRewriter {
 
             return SyntaxFactory.makeTupleExprElement(
                 label: label,
-                colon: label != nil ? SyntaxFactory.makeColonToken().withTrailingTrivia(Trivia(pieces: [.spaces(1)])) : nil,
+                colon: label != nil ? SyntaxFactory.makeColonToken().withTrailingTrivia(Trivia.spaces(1)) : nil,
                 expression: parameterExpression,
-                trailingComma: index == initParameters.count - 1 ? nil : SyntaxFactory.makeCommaToken().withTrailingTrivia(Trivia(pieces: [.spaces(1)]))
+                trailingComma: index == parameterList.count - 1 ? nil : SyntaxFactory.makeCommaToken().withTrailingTrivia(Trivia.spaces(1))
             )
         }
 
-        // First and only item in the body code block
-        let item = SyntaxFactory.makeFunctionCallExpr(
-            calledExpression: ExprSyntax(calledExpression),
-            leftParen: SyntaxFactory.makeLeftParenToken(),
-            argumentList: SyntaxFactory.makeTupleExprElementList(parameters),
-            rightParen: SyntaxFactory.makeRightParenToken(),
-            trailingClosure: nil,
-            additionalTrailingClosures: nil
-        )
-
-        // Statement for that item
-        let statement = SyntaxFactory.makeCodeBlockItem(
-            item: Syntax(item),
-            semicolon: nil,
-            errorTokens: nil
-        ).withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(8)]))
-
-        if generateInit {
-            // TODO: remove any comment block from the initializer
-            return DeclSyntax(
-                node
-                    // Rewrite body to use our new code block
-                    .withBody(
-                        SyntaxFactory.makeCodeBlock(
-                            leftBrace: SyntaxFactory.makeLeftBraceToken(),
-                            statements: SyntaxFactory.makeCodeBlockItemList([statement]),
-                            rightBrace: SyntaxFactory.makeRightBraceToken().withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(4)]))
-                        )
-                    )
-                    // Rewrite parameters to use our new list
-                    .withParameters(SyntaxFactory.makeParameterClause(
-                        leftParen: SyntaxFactory.makeLeftParenToken(),
-                        parameterList: SyntaxFactory.makeFunctionParameterList(initParameters),
-                        rightParen: SyntaxFactory.makeRightParenToken()
-                    ).withTrailingTrivia(Trivia(pieces: [.spaces(1)])))
-            )
+        if !foundRippling {
+            return nil
         }
-        else {
-            return DeclSyntax(SyntaxFactory.makeBlankUnknownDecl())
-        }
+
+        return list
     }
 
-    /// Rewrites one initializer parameter.
+    /// Rewrites one function parameter to go from a rippling value to an escaping autoclosure.
+    /// Other parameters are left untouched.
     func rewriteParameter(_ node: FunctionParameterSyntax) -> FunctionParameterSyntax {
         guard let type = node.type?.as(SimpleTypeIdentifierSyntax.self) else {
             return node
@@ -207,10 +231,10 @@ class InitRewriter: SyntaxRewriter {
             baseType: TypeSyntax(SyntaxFactory.makeFunctionType(
                 leftParen: SyntaxFactory.makeLeftParenToken(),
                 arguments: SyntaxFactory.makeBlankTupleTypeElementList(),
-                rightParen: SyntaxFactory.makeRightParenToken().withTrailingTrivia(Trivia(pieces: [.spaces(1)])),
+                rightParen: SyntaxFactory.makeRightParenToken().withTrailingTrivia(Trivia.spaces(1)),
                 asyncKeyword: nil,
                 throwsOrRethrowsKeyword: nil,
-                arrow: SyntaxFactory.makeArrowToken().withTrailingTrivia(Trivia(pieces: [.spaces(1)])),
+                arrow: SyntaxFactory.makeArrowToken().withTrailingTrivia(Trivia.spaces(1)),
                 returnType: ripplingType
             ))
         )
@@ -226,7 +250,7 @@ class InitRewriter: SyntaxRewriter {
                 if let argument = originalFunctionCall.argumentList.first {
                     // Create the new default argument
                     defaultArgument = SyntaxFactory.makeInitializerClause(
-                        equal: SyntaxFactory.makeEqualToken().withLeadingTrivia(Trivia(pieces: [.spaces(1)])).withTrailingTrivia(Trivia(pieces: [.spaces(1)])),
+                        equal: SyntaxFactory.makeEqualToken().withLeadingTrivia(Trivia.spaces(1)).withTrailingTrivia(Trivia.spaces(1)),
                         value: argument.expression
                     )
                 }
@@ -238,7 +262,7 @@ class InitRewriter: SyntaxRewriter {
             attributes: SyntaxFactory.makeBlankAttributeList(),
             firstName: node.firstName,
             secondName: node.secondName,
-            colon: SyntaxFactory.makeColonToken().withTrailingTrivia(Trivia(pieces: [.spaces(1)])),
+            colon: SyntaxFactory.makeColonToken().withTrailingTrivia(Trivia.spaces(1)),
             type: TypeSyntax(newType),
             ellipsis: nil,
             defaultArgument: defaultArgument,
@@ -247,20 +271,111 @@ class InitRewriter: SyntaxRewriter {
 
         return newParameter
     }
+
+    /// Rewriter for function declarations. Used to rewrite view modifiers.
+    override func visit(_ node: FunctionDeclSyntax) -> DeclSyntax {
+        // Rewrite parameters to change from `Rippling` to escaping autoclosures
+        let funcParameters = node.signature.input.parameterList.map { self.rewriteParameter($0) }
+
+        // Rewrite the body to call the original function
+        let calledExpression = SyntaxFactory.makeMemberAccessExpr(
+            base: ExprSyntax(SyntaxFactory.makeIdentifierExpr(identifier: SyntaxFactory.makeSelfKeyword(), declNameArguments: nil)),
+            dot: SyntaxFactory.makePeriodToken(),
+            name: node.identifier,
+            declNameArguments: nil
+        )
+
+        // Get parameters list for the generated function call
+        if let calledInitParameters = getCalledFunctionArguments(
+            parameterList: node.signature.input.parameterList,
+            rewrittenParameters: funcParameters
+        ) {
+            // First and only item in the body code block
+            let item = SyntaxFactory.makeFunctionCallExpr(
+                calledExpression: ExprSyntax(calledExpression),
+                leftParen: SyntaxFactory.makeLeftParenToken(),
+                argumentList: SyntaxFactory.makeTupleExprElementList(calledInitParameters),
+                rightParen: SyntaxFactory.makeRightParenToken(),
+                trailingClosure: nil,
+                additionalTrailingClosures: nil
+            )
+
+            // Return statement
+            let returnStatement = SyntaxFactory.makeReturnStmt(
+                returnKeyword: SyntaxFactory.makeReturnKeyword().withTrailingTrivia(Trivia.spaces(1)),
+                expression: ExprSyntax(item)
+            )
+
+            // Statement for that item
+            let statement = SyntaxFactory.makeCodeBlockItem(
+                item: Syntax(returnStatement),
+                semicolon: nil,
+                errorTokens: nil
+            ).withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(8)]))
+
+            return DeclSyntax(
+                node
+                    // Rewrite body to use our new code block
+                    .withBody(
+                        SyntaxFactory.makeCodeBlock(
+                            leftBrace: SyntaxFactory.makeLeftBraceToken(),
+                            statements: SyntaxFactory.makeCodeBlockItemList([statement]),
+                            rightBrace: SyntaxFactory.makeRightBraceToken().withLeadingTrivia(Trivia(pieces: [.newlines(1), .spaces(4)]))
+                        )
+                    )
+                    // Rewrite parameters to use our new list
+                    .withSignature(
+                        node.signature.withInput(SyntaxFactory.makeParameterClause(
+                            leftParen: SyntaxFactory.makeLeftParenToken(),
+                            parameterList: SyntaxFactory.makeFunctionParameterList(funcParameters),
+                            rightParen: SyntaxFactory.makeRightParenToken()
+                        ).withTrailingTrivia(Trivia.spaces(1)))
+                    )
+            )
+        }
+        else {
+            return DeclSyntax(SyntaxFactory.makeBlankUnknownDecl())
+        }
+    }
+}
+
+/// An extension generated by the plugin.
+class GeneratedExtension {
+    /// Modifiers of the extension, if any.
+    var modifiers: ModifierListSyntax?
+
+    /// The extended type.
+    var extendedType: String
+
+    /// All initializers generated for this extension.
+    var initializers: [InitializerDeclSyntax] = []
+
+    init(modifiers: ModifierListSyntax?, extendedType: String) {
+        self.modifiers = modifiers
+        self.extendedType = extendedType
+    }
 }
 
 class Visitor: SyntaxVisitor {
-    let rewriter = InitRewriter()
+    let rewriter = Rewriter()
 
-    var currentStruct: StructDeclSyntax?
+    /// Extension currently being generated.
+    var currentExtension: GeneratedExtension?
 
-    /// Generated initializers for every visited struct.
-    var generatedInitializers: [StructDeclSyntax: [InitializerDeclSyntax]] = [:]
+    /// Generated extensions.
+    var generatedExtensions: [GeneratedExtension] = []
 
     /// Visitor for structures.
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        // Store the struct as the "current" one.
-        self.currentStruct = node
+        // Create a new generated extension for that struct
+        let currentExtension = GeneratedExtension(
+            modifiers: node.modifiers,
+            extendedType: node.identifier.withoutTrivia().text
+        )
+        self.currentExtension = currentExtension
+
+        // Add it to the list
+        self.generatedExtensions.append(currentExtension)
 
         return .visitChildren
     }
@@ -268,28 +383,38 @@ class Visitor: SyntaxVisitor {
     /// Called after structs and its children are visited.
     override func visitPost(_ node: StructDeclSyntax) {
         // We are finished visiting the struct, clear our state
-        self.currentStruct = nil
+        self.currentExtension = nil
     }
 
     /// Visitor for initializers.
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
-        // Only visit initializers of structs that we care about
-        guard let currentStruct = self.currentStruct else {
+        // Only visit initializers of things that we care about (skip classes, extensions...)
+        guard let currentExtension = self.currentExtension else {
             return .skipChildren
         }
 
-        // Call the rewriter visitor to get the new `init` and add it to the list
+        // Call the rewriter visitor to get the new `init` and add it to the list.
         // Having `nil` here means the rewriter gave us an "unknown decl syntax", which means "don't
-        // generate any initializer"
-        if let newInit = rewriter.visit(node).as(InitializerDeclSyntax.self) {
-            if var list = self.generatedInitializers[currentStruct] {
-                list.append(newInit)
-            } else {
-                self.generatedInitializers[currentStruct] = [newInit]
-            }
+        // generate any initializer".
+        if let newInit = self.rewriter.visit(node).as(InitializerDeclSyntax.self) {
+            currentExtension.initializers.append(newInit)
         }
 
+        return .skipChildren
+    }
 
+    /// Visitor for extensions.
+    override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+        // Only visit extensions of `View` (assume it's the Ripple `View` type)
+        if node.extendedType.as(SimpleTypeIdentifierSyntax.self)?.name.withoutTrivia().text != "View" {
+            return .skipChildren
+        }
+
+        // Run the rewriter on the extension declaration to get a new declaration containing our new
+        // functions
+        if let newDecl = rewriter.visit(node).as(ExtensionDeclSyntax.self) {
+            // TODO: do something with it
+        }
 
         return .skipChildren
     }
@@ -307,32 +432,32 @@ do {
     let visitor = Visitor()
     visitor.walk(src)
 
-    for (structDecl, inits) in visitor.generatedInitializers {
+    for ext in visitor.generatedExtensions {
         // If there are no initializers, don't add the extension
-        if inits.count == 0 {
+        if ext.initializers.count == 0 {
             continue
         }
 
         // Copy modifiers from original struct (access level...)
         var modifiers = ""
 
-        if let originalModifiers = structDecl.modifiers {
+        if let originalModifiers = ext.modifiers {
             modifiers = String(describing: originalModifiers.withoutTrivia()) // remove trivia for documentation blocks
         }
 
-        content += "\(modifiers) extension \(structDecl.identifier.text) {\n"
-        for var initializer in inits {
+        content += "\(modifiers) extension \(ext.extendedType) {\n"
+        for var initializer in ext.initializers {
             // If the initializer access level is the same as the extension one, remove it from the initializer
             // to prevent emitting "xxx modifier is redundant for initializers declared in a xxx extension" warnings
 
             let newModifiers: [DeclModifierSyntax] = initializer.modifiers?.withoutTrivia().filter {
                 !( // only keep those that are not contained in both lists
-                    structDecl.modifiers?.withoutTrivia()
+                    ext.modifiers?.withoutTrivia()
                         .map({ $0.name.text.trimmingCharacters(in: .whitespacesAndNewlines) })
                         .contains($0.name.text.trimmingCharacters(in: .whitespacesAndNewlines)) ?? false // in case there are no modifiers in the struct
                 )
             } ?? [] // in case there are no modifiers in the initializer
-            initializer = initializer.withModifiers(SyntaxFactory.makeModifierList(newModifiers).withTrailingTrivia(Trivia(pieces: [.spaces(1)])))
+            initializer = initializer.withModifiers(SyntaxFactory.makeModifierList(newModifiers).withTrailingTrivia(Trivia.spaces(1)))
 
             content += "    " + String(describing: initializer) + "\n"
         }
