@@ -22,7 +22,7 @@ import Yoga
 public class ViewTarget: TargetNode, DrawableTarget, LayoutTarget, StyleTarget {
     public let type: TargetType = .view
 
-    public var children: [TargetNode] = []
+    public var children = [TargetNode]()
     public var parent: TargetNode?
 
     private let ygNode: YGNodeRef

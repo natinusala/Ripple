@@ -73,7 +73,7 @@ class ObservableRecordingEntry {
 
 /// Stack of observable access recording. The last entry is the observable that is currently
 /// being evaluated.
-var observableRecordingStack: [ObservableRecordingEntry] = []
+var observableRecordingStack = [ObservableRecordingEntry]()
 
 extension Observable {
     /// Runs the given closure when the observed value changes. The closure will be executed

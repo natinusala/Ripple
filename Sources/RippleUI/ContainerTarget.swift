@@ -20,7 +20,7 @@ import RippleCore
 public class ContainerTarget: TargetNode {
     public let type: TargetType = .container
 
-    public var children: [TargetNode] = []
+    public var children = [TargetNode]()
     public var parent: TargetNode?
 
     open func insert(child: inout TargetNode, at position: UInt?) {

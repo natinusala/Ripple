@@ -23,7 +23,7 @@ import OpenCombine
 @propertyWrapper
 public class State<Value>: Observable {
     public let subject = ObservableSubject()
-    public var dependencies: [AnyCancellable] = []
+    public var dependencies = [AnyCancellable]()
     public var pendingRefresh = false
 
     /// Contains the actual state value.

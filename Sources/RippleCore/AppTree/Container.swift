@@ -67,7 +67,7 @@ public class ContainerOutput: Output {
     public let makeTarget: () -> TargetNode?
 
     public var isShallow: Bool
-    public let modifiers: [ViewModifierTarget] = []
+    public let modifiers = [ViewModifierTarget]()
 
     init<C>(of container: C) where C: Container {
         self.value = container

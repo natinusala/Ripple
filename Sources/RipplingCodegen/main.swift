@@ -221,7 +221,7 @@ class Rewriter: SyntaxRewriter {
         let ripplingType = genericArguments.first!.argumentType
 
         // Rewrite type from `Rippling<Value>` to `() -> Value` + add `@escaping @autoclosure` attributes
-        var attributes: [AttributeSyntax] = []
+        var attributes = [AttributeSyntax]()
         attributes.append(makeSimpleAttribute(identifier: "escaping"))
         attributes.append(makeSimpleAttribute(identifier: "autoclosure"))
 
@@ -354,7 +354,7 @@ class Visitor: SyntaxVisitor {
     var currentExtension: ExtensionDeclSyntax?
 
     /// Generated extensions.
-    var generatedExtensions: [ExtensionDeclSyntax] = []
+    var generatedExtensions = [ExtensionDeclSyntax]()
 
     /// Visitor for structures.
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {

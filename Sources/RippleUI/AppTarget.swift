@@ -55,7 +55,7 @@ public extension App {
 public class AppTarget: TargetNode, FrameTarget, Context {
     public let type: TargetType = .app
 
-    public var children: [TargetNode] = []
+    public var children = [TargetNode]()
     public var parent: TargetNode?
 
     /// Has the user requested that the app exits?

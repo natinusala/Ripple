@@ -39,7 +39,7 @@ import OpenCombine
 @propertyWrapper
 public class Rippling<Value>: Observable {
     public let subject = ObservableSubject()
-    public var dependencies: [AnyCancellable] = []
+    public var dependencies = [AnyCancellable]()
     public var pendingRefresh = false
     public var cachedValue: Value?
 

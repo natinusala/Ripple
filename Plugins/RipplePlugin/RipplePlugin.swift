@@ -63,7 +63,7 @@ let buildCommands = [
 @main
 struct RipplePlugin: BuildToolPlugin {
     func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-        var commands: [Command] = []
+        var commands = [Command]()
 
         guard let target = target as? SwiftSourceModuleTarget else {
             return []

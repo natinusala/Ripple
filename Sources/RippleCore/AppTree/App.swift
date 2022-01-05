@@ -74,7 +74,7 @@ public class AppOutput: Output {
     public let makeTarget: () -> TargetNode?
 
     public let isShallow: Bool
-    public let modifiers: [ViewModifierTarget] = []
+    public let modifiers = [ViewModifierTarget]()
 
     init<A: App>(of app: A) {
         self.value = app

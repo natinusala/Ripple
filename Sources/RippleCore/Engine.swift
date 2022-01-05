@@ -71,7 +71,7 @@ class MountedNode: CustomStringConvertible {
     let target: TargetNode?
 
     var parent: MountedNode?
-    var children: [MountedNode] = []
+    var children = [MountedNode]()
 
     /// Creates a new node.
     init(output: Output, parent: MountedNode? = nil, target: TargetNode? = nil) {

@@ -113,7 +113,7 @@ public class ViewOutput: CustomStringConvertible, Output {
     public let makeBody: () -> [Output]
 
     /// Modifiers for this view.
-    public var modifiers: [ViewModifierTarget] = []
+    public var modifiers = [ViewModifierTarget]()
 
     public let makeTarget: () -> TargetNode?
 
