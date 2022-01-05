@@ -41,7 +41,7 @@ for token in toReplace {
 var lines: [String] = [
     "import Foundation",
     "import Ripple",
-    "extension Resource where Self == URL {",
+    "extension URL {",
     "    static var \(varName): Self {",
     "        guard let url = Bundle.module.url(forResource: \"\(input.basenameWithoutExt)\", withExtension: \"\(ext)\") else {",
     "            Logger.error(\"Could not find resource `\(input.basenameWithoutExt)` (with extension `\(ext)`)\")",

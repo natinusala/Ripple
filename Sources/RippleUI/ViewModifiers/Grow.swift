@@ -34,8 +34,8 @@ public struct GrowModifier: ViewModifier {
 public extension View {
     /// Changes the grow factor of the view.
     /// TODO: change to `Dimension` to allow using percentages
-    func grow(_ grow: @escaping @autoclosure () -> Float) -> some View {
-        return modifier(GrowModifier(grow: .init(grow())))
+    func grow(_ grow: Rippling<Float>) -> some View {
+        return modifier(GrowModifier(grow: grow))
     }
 }
 

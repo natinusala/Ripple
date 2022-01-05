@@ -33,8 +33,8 @@ public struct WidthModifier: ViewModifier {
 
 public extension View {
     /// Changes the width of the view.
-    func width(_ width: @escaping @autoclosure () -> Dimension) -> some View {
-        return modifier(WidthModifier(width: .init(width())))
+    func width(_ width: Rippling<Dimension>) -> some View {
+        return modifier(WidthModifier(width: width))
     }
 }
 

@@ -46,7 +46,7 @@ public class Rippling<Value>: Observable {
     /// The function to evaluate to get the latest value.
     let function: () -> Value
 
-    /// Creates a new rippling to the given value.
+    /// Creates a new rippling value from the given expression.
     public init(_ function: @escaping @autoclosure () -> Value) {
         self.function = function
         self.refreshCachedValue()

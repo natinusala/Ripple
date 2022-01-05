@@ -38,24 +38,23 @@ public struct MarginModifier: ViewModifier {
 
 public extension View {
     /// Sets the margin of the view for all 4 edges.
-    func margin(_ margin: @escaping @autoclosure () -> Dimension) -> some View {
-        let rippling = Rippling<Dimension>(margin())
-        return modifier(MarginModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
+    func margin(_ margin: Rippling<Dimension>) -> some View {
+        return modifier(MarginModifier(top: margin, right: margin, bottom: margin, left: margin))
     }
 
     /// Sets the margin of the view for specified edges.
     func margin(
-        top: @escaping @autoclosure () -> Dimension = 0,
-        right: @escaping @autoclosure () -> Dimension = 0,
-        bottom: @escaping @autoclosure () -> Dimension = 0,
-        left: @escaping @autoclosure () -> Dimension = 0
+        top: Rippling<Dimension> = .init(0),
+        right: Rippling<Dimension> = .init(0),
+        bottom: Rippling<Dimension> = .init(0),
+        left: Rippling<Dimension> = .init(0)
     ) -> some View {
         return modifier(
             MarginModifier(
-                top: .init(top()),
-                right: .init(right()),
-                bottom: .init(bottom()),
-                left: .init(left())
+                top: top,
+                right: right,
+                bottom: bottom,
+                left: left
             )
         )
     }
@@ -63,15 +62,15 @@ public extension View {
     /// Sets the margin of the view for both horizontal edges (left / right)
     /// and vertical edges (top / bottom).
     func margin(
-        horizontal: @escaping @autoclosure () -> Dimension = 0,
-        vertical: @escaping @autoclosure () -> Dimension = 0
+        horizontal: Rippling<Dimension> = .init(0),
+        vertical: Rippling<Dimension> = .init(0)
     ) -> some View {
         return modifier(
             MarginModifier(
-                top: .init(vertical()),
-                right: .init(horizontal()),
-                bottom: .init(vertical()),
-                left: .init(horizontal())
+                top: vertical,
+                right: horizontal,
+                bottom: vertical,
+                left: horizontal
             )
         )
     }

@@ -18,11 +18,11 @@ import RippleCore
 
 /// Changes the font of a `Text`.
 public struct FontModifier: ViewModifier {
-    @Rippling var typeface: Resource
+    @Rippling var typeface: URL
     @Rippling var size: DIP
 
     public init(
-        typeface: Rippling<Resource>,
+        typeface: Rippling<URL>,
         size: Rippling<DIP>
     ) {
         self._typeface = typeface
@@ -37,21 +37,21 @@ public struct FontModifier: ViewModifier {
 public extension View {
     /// Changes the font of the text (typeface and size).
     func font(
-        typeface: @escaping @autoclosure () -> Resource,
-        size: @escaping @autoclosure () -> DIP
+        typeface: Rippling<URL>,
+        size: Rippling<DIP>
     ) -> some View {
-        return modifier(FontModifier(typeface: .init(typeface()), size: .init(size())))
+        return modifier(FontModifier(typeface: typeface, size: size))
     }
 }
 
 public class FontTarget: ViewModifierTarget {
-    @Rippling var typeface: Resource
+    @Rippling var typeface: URL
     @Rippling var size: DIP
 
     public var boundTarget: TargetNode?
 
     public init(
-        typeface: Rippling<Resource>,
+        typeface: Rippling<URL>,
         size: Rippling<DIP>
     ) {
         self._typeface = typeface

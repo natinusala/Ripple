@@ -16,11 +16,5 @@
 
 import Foundation
 
-/// An asset file bundled with the app.
-public protocol Resource {
-
-}
-
-extension URL: Resource {
-    
-}
+/// An URL to a resource bundled with the app.
+public typealias URL = Foundation.URL

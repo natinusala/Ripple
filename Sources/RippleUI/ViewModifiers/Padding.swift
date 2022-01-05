@@ -38,24 +38,23 @@ public struct PaddingModifier: ViewModifier {
 
 public extension View {
     /// Sets the padding of the view for all 4 edges.
-    func padding(_ padding: @escaping @autoclosure () -> Dimension) -> some View {
-        let rippling = Rippling<Dimension>(padding())
-        return modifier(PaddingModifier(top: rippling, right: rippling, bottom: rippling, left: rippling))
+    func padding(_ padding: Rippling<Dimension>) -> some View {
+        return modifier(PaddingModifier(top: padding, right: padding, bottom: padding, left: padding))
     }
 
     /// Sets the padding of the view for specified edges.
     func padding(
-        top: @escaping @autoclosure () -> Dimension = 0,
-        right: @escaping @autoclosure () -> Dimension = 0,
-        bottom: @escaping @autoclosure () -> Dimension = 0,
-        left: @escaping @autoclosure () -> Dimension = 0
+        top: Rippling<Dimension> = .init(0),
+        right: Rippling<Dimension> = .init(0),
+        bottom: Rippling<Dimension> = .init(0),
+        left: Rippling<Dimension> = .init(0)
     ) -> some View {
         return modifier(
             PaddingModifier(
-                top: .init(top()),
-                right: .init(right()),
-                bottom: .init(bottom()),
-                left: .init(left())
+                top: top,
+                right: right,
+                bottom: bottom,
+                left: left
             )
         )
     }
@@ -63,15 +62,15 @@ public extension View {
     /// Sets the padding of the view for both horizontal edges (left / right)
     /// and vertical edges (top / bottom).
     func padding(
-        horizontal: @escaping @autoclosure () -> Dimension = 0,
-        vertical: @escaping @autoclosure () -> Dimension = 0
+        horizontal: Rippling<Dimension> = .init(0),
+        vertical: Rippling<Dimension> = .init(0)
     ) -> some View {
         return modifier(
             PaddingModifier(
-                top: .init(vertical()),
-                right: .init(horizontal()),
-                bottom: .init(vertical()),
-                left: .init(horizontal())
+                top: vertical,
+                right: horizontal,
+                bottom: vertical,
+                left: horizontal
             )
         )
     }

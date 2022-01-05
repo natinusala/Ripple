@@ -32,8 +32,8 @@ public struct ShrinkModifier: ViewModifier {
 
 public extension View {
     /// Changes the shrink factor of the view.
-    func shrink(_ shrink: @escaping @autoclosure () -> Float) -> some View {
-        return modifier(ShrinkModifier(shrink: .init(shrink())))
+    func shrink(_ shrink: Rippling<Float>) -> some View {
+        return modifier(ShrinkModifier(shrink: shrink))
     }
 }
 
