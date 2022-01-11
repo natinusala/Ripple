@@ -16,45 +16,32 @@
 
 import RippleCore
 
-/// Changes the font of a `Text`.
-public struct FontModifier: ViewModifier {
-    @Rippling var typeface: URL
+/// Changes the size of a `Text`.
+public struct SizeModifier: ViewModifier {
     @Rippling var size: DIP
 
-    public init(
-        typeface: Rippling<URL>,
-        size: Rippling<DIP>
-    ) {
-        self._typeface = typeface
+    public init(size: Rippling<DIP>) {
         self._size = size
     }
 
-    public static func makeTarget(of modifier: FontModifier) -> FontTarget {
-        return FontTarget(typeface: modifier._typeface, size: modifier._size)
+    public static func makeTarget(of modifier: SizeModifier) -> SizeTarget {
+        return SizeTarget(size: modifier._size)
     }
 }
 
 public extension View {
-    /// Changes the font of the text (typeface and size).
-    func font(
-        typeface: Rippling<URL>,
-        size: Rippling<DIP>
-    ) -> some View {
-        return modifier(FontModifier(typeface: typeface, size: size))
+    /// Changes the size of the text.
+    func size(_ size: Rippling<DIP>) -> some View {
+        return modifier(SizeModifier(size: size))
     }
 }
 
-public class FontTarget: ViewModifierTarget {
-    @Rippling var typeface: URL
+public class SizeTarget: ViewModifierTarget {
     @Rippling var size: DIP
 
     public var boundTarget: TargetNode?
 
-    public init(
-        typeface: Rippling<URL>,
-        size: Rippling<DIP>
-    ) {
-        self._typeface = typeface
+    public init(size: Rippling<DIP>) {
         self._size = size
     }
 }
