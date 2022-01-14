@@ -22,3 +22,6 @@ let debugGraphicsBackend = false
 
 /// Enables logs for layout engine.
 let debugLayout = false
+
+/// Enables logs for font loading and rendering.
+let debugFont = true

@@ -37,7 +37,7 @@ class EnvironmentVariableStorage {
 /// Storage for environment variables.
 public class EnvironmentVariables {
     /// All environment variables.
-    var values: [ObjectIdentifier: EnvironmentVariableStorage] = [:]
+    var values = [ObjectIdentifier: EnvironmentVariableStorage]()
 
     /// The last accessed key, used to get the subject from a key path.
     var lastAccessedKey: ObjectIdentifier?

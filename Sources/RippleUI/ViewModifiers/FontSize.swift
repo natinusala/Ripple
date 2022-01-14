@@ -17,31 +17,29 @@
 import RippleCore
 
 /// Changes the size of a `Text`.
-public struct SizeModifier: ViewModifier {
+public struct FontSizeModifier: ViewModifier {
     @Rippling var size: DIP
 
     public init(size: Rippling<DIP>) {
         self._size = size
     }
 
-    public static func makeTarget(of modifier: SizeModifier) -> SizeTarget {
-        return SizeTarget(size: modifier._size)
+    public static func makeTarget(of modifier: FontSizeModifier) -> FontSizeTarget {
+        return FontSizeTarget(observing: modifier._size)
     }
 }
 
 public extension View {
     /// Changes the size of the text.
-    func size(_ size: Rippling<DIP>) -> some View {
-        return modifier(SizeModifier(size: size))
+    func fontSize(_ size: Rippling<DIP>) -> some View {
+        return modifier(FontSizeModifier(size: size))
     }
 }
 
-public class SizeTarget: ViewModifierTarget {
-    @Rippling var size: DIP
-
-    public var boundTarget: TargetNode?
-
-    public init(size: Rippling<DIP>) {
-        self._size = size
+public class FontSizeTarget: ObservingViewModifierTarget<DIP> {
+    override public func onValueChange(newValue: DIP) {
+        if var fontTarget = self.boundTarget as? FontTarget {
+            fontTarget.font.size = newValue
+        }
     }
 }

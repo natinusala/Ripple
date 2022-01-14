@@ -27,6 +27,7 @@ import TSCBasic
 // It also looks for any View extensions containing functions with rippling values and creates
 // another View extension containing the same function with parameters replaced.
 // These are for view modifiers.
+// TODO: rewrite using Sourcery once guaranteed to work on all platforms?
 
 /// Makes a simple attribute with only an identifier.
 func makeSimpleAttribute(identifier: String) -> AttributeSyntax {

@@ -76,3 +76,12 @@ protocol LayoutTarget {
 protocol StyleTarget {
     var style: Style { get set }
 }
+
+/// Target protocol for anything that has an associated font.
+protocol FontTarget {
+    /// The font used for the text.
+    var font: Font { get set }
+
+    /// The style used for the text.
+    var fontStyle: Style { get set }
+}

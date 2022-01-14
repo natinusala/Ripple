@@ -16,5 +16,21 @@
 
 import Foundation
 
+import Skia
+
 /// An URL to a resource bundled with the app.
-public typealias URL = Foundation.URL
+public typealias Resource = Foundation.URL
+
+public extension Resource {
+    /// Attempts to create a Skia data object from this resource.
+    func toSkData() -> OpaquePointer? {
+        if self.isFileURL {
+            let resolved = self.resolvingSymlinksInPath()
+            let path = resolved.path
+
+            return sk_data_new_from_file(path)
+        }
+
+        fatalError("toSkData() unimplemented for non-file resources")
+    }
+}

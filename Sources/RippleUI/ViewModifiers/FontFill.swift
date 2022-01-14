@@ -16,30 +16,32 @@
 
 import RippleCore
 
-/// Changes the typeface of a `Text`.
-public struct TypefaceModifier: ViewModifier {
-    @Rippling var typeface: Resource
+// TODO: add a convenience FontColor modifier once modifiers body property is implemented
 
-    public init(typeface: Rippling<Resource>) {
-        self._typeface = typeface
+/// Changes the fill of a `Text`.
+public struct FontFillModifier: ViewModifier {
+    @Rippling var fill: Fill
+
+    public init(fill: Rippling<Fill>) {
+        self._fill = fill
     }
 
-    public static func makeTarget(of modifier: TypefaceModifier) -> TypefaceTarget {
-        return TypefaceTarget(observing: modifier._typeface)
+    public static func makeTarget(of modifier: FontFillModifier) -> FontFillTarget {
+        return FontFillTarget(observing: modifier._fill)
     }
 }
 
 public extension View {
-    /// Changes the typeface of the text.
-    func typeface(_ typeface: Rippling<Resource>) -> some View {
-        return modifier(TypefaceModifier(typeface: typeface))
+    /// Changes the fill of the text.
+    func fontFill(_ fill: Rippling<Fill>) -> some View {
+        return modifier(FontFillModifier(fill: fill))
     }
 }
 
-public class TypefaceTarget: ObservingViewModifierTarget<Resource> {
-    override public func onValueChange(newValue: Resource) {
+public class FontFillTarget: ObservingViewModifierTarget<Fill> {
+    override public func onValueChange(newValue: Fill) {
         if var fontTarget = self.boundTarget as? FontTarget {
-            fontTarget.font.typeface = Typeface(from: newValue)
+            fontTarget.fontStyle.fill = newValue
         }
     }
 }

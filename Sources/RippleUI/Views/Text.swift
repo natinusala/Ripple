@@ -42,20 +42,11 @@ public struct Text: View {
 }
 
 /// Target for text views.
-public class TextTarget: ViewTarget {
+public class TextTarget: ViewTarget, FontTarget {
     @Rippling var text: String
 
-    var font = Font() {
-        didSet {
-            // TODO: react to font changes as needed
-        }
-    }
-
-    var textStyle = Style() {
-        didSet {
-            // TODO: react to style changes here as needed
-        }
-    }
+    public var font = Font()
+    public var fontStyle = Style()
 
     init(text: Rippling<String>) {
         self._text = text
